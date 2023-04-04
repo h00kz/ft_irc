@@ -1,5 +1,3 @@
-
-// Client.cpp
 #include "Client.hpp"
 #include "Server.hpp"
 
@@ -27,16 +25,15 @@ time_t Client::GetLastActive() const
 	return _lastActive;
 }
 
-bool Client::IsConnected() const {
+bool Client::IsConnected() const
+{
 	int error = 0;
 	socklen_t len = sizeof(error);
 	int retval = getsockopt(_socketDescriptor, SOL_SOCKET, SO_ERROR, &error, &len);
-	if (retval != 0) {
+	if (retval != 0)
 		return false;
-	}
-	if (error != 0) {
+	if (error != 0)
 		return false;
-	}
 	return true;
 }
 
@@ -115,9 +112,8 @@ void Client::JoinChannel(const std::string &channel)
 	if (this->IsInChannel(channel))
 		return;
 	_channels.push_back(channel);
-    if (_server) {
+    if (_server)
         _server->AddChannel(channel);
-    }
 }
 
 void Client::LeaveChannel(const std::string &channel)
@@ -197,7 +193,6 @@ bool Client::IsInChannel(const std::string& channel) const
 
 void Client::SendData(const std::string& data)
 {
-	if (_socketDescriptor != -1) {
+	if (_socketDescriptor != -1)
 		send(_socketDescriptor, data.c_str(), data.length(), 0);
-	}
 }
