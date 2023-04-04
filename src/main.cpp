@@ -7,7 +7,7 @@ void handle_sigint(int signal)
 {
 	if (g_server != NULL)
 		g_server->Close();
-    std::cout << "SIGINT received. Terminating the server." << std::endl;
+    std::cout << "\nTerminating the server." << std::endl;
     exit(signal);
 }
 

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <sys/socket.h>
+#include <sys/epoll.h>
 #include <arpa/inet.h>
 #include "Client.hpp"
 #include <cstdlib>
@@ -13,6 +14,7 @@
 #include <netinet/in.h>
 #include <sstream>
 #include <fcntl.h>
+#include <cerrno>
 
 enum Command {
 	NICK,
@@ -60,6 +62,7 @@ class Server
 		std::string const		_serverName;
 		int						_serverSd;
 		int						_port;
+		int						_epollFd;
 
 };
 

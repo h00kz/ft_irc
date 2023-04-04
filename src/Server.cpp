@@ -1,5 +1,4 @@
 #include "Server.hpp"
-#include <cerrno>
 
 Server::Server(int port, std::string const &passwd)
 	: _serverPasswd(passwd), _serverName("MyServer"), _port(port)
@@ -43,6 +42,10 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 			else
 			{
 				std::cout << "Client not authenticated: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
+				if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
+				{
+					std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
+				}
 				client->Close();
 				_clients.erase(client->GetSocketDescriptor());
 				return;
@@ -62,7 +65,8 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 			iss >> username >> host >> server;
 
 			std::getline(iss, realname);
-
+			if (!realname.empty() && realname[0] == ':')
+				realname.erase(0, 1);
 			client->SetUsername(username);
 			client->SetHost(host);
 			client->SetServer(server);
@@ -98,14 +102,10 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 			std::string target, message;
 			iss >> target;
 			getline(iss, message);
-			// if (!message.empty() && message[0] == ' ') {
-			// 	message.erase(0, 1);
-			// }
-			// if (!message.empty() && message[0] == ':') {
-			// 	message.erase(0, 1);
-			// }
+			if (!message.empty() && message[0] == ':')
+				message.erase(0, 1);
 			client->SendMessage(target, message);
-			// std::cout << "Client sent message to " << target << ": " << message << std::endl;
+			std::cout << "Client sent message to " << target << ": " << message << std::endl;
 			break;
 		}
 		case PART: {
@@ -124,24 +124,30 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 
 void Server::Close()
 {
-	if (_serverSd != -1) {
+	if (_serverSd != -1)
+	{
+		std::map<int, Client*>::iterator it = _clients.begin();
+		for (;it != _clients.end();)
+			DisconnectClient(it, it->second, _clients);
+		std::cout << std::endl << "_clients size : " << _clients.size()<< " content(sockD) : " << std::endl;
 		close(_serverSd);
+		close(_epollFd);
 		_serverSd = -1;
 	}
 }
 const std::map<int, Client*>& Server::GetClients() const
 {
-    return _clients;
+	return _clients;
 }
 
 void Server::RemoveChannel(const std::string &channel)
 {
-    std::vector<std::string>::iterator it = std::find(_channels.begin(), _channels.end(), channel);
-    if (it != _channels.end())
-    {
-        _channels.erase(it);
-        std::cout << "Channel removed: " << channel << std::endl;
-    }
+	std::vector<std::string>::iterator it = std::find(_channels.begin(), _channels.end(), channel);
+	if (it != _channels.end())
+	{
+		_channels.erase(it);
+		std::cout << "Channel removed: " << channel << std::endl;
+	}
 }
 
 void Server::AddChannel(std::string const &channel)
@@ -168,13 +174,13 @@ void Server::Init()
 	_serverSd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serverSd == -1)
 	{
-    	std::cerr << "Socket: " << strerror(errno) << std::endl;
+		std::cerr << "Socket: " << strerror(errno) << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	int optval = 1;
 	if (setsockopt(_serverSd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
 	{
-    	std::cerr << "Sockopt: " << strerror(errno) << std::endl;
+		std::cerr << "Sockopt: " << strerror(errno) << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	memset(&_servAddr, 0, sizeof(_servAddr));
@@ -183,15 +189,30 @@ void Server::Init()
 	_servAddr.sin_port = htons(_port);
 	if (bind(_serverSd, reinterpret_cast<struct sockaddr*>(&_servAddr), sizeof(_servAddr)) == -1)
 	{
-    	std::cerr << "Bind: " << strerror(errno) << std::endl;
+		std::cerr << "Bind: " << strerror(errno) << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	if (listen(_serverSd, 10) == -1)
 	{
-    	std::cerr << "Listen: " << strerror(errno) << std::endl;
+		std::cerr << "Listen: " << strerror(errno) << std::endl;
 		exit(EXIT_FAILURE);
 	}
 	fcntl(_serverSd, F_SETFL, O_NONBLOCK);
+	_epollFd = epoll_create1(0);
+	if (_epollFd == -1)
+	{
+		std::cerr << "Epoll create: " << strerror(errno) << std::endl;
+		exit(EXIT_FAILURE);
+	}
+	struct epoll_event ev;
+	bzero(&ev, sizeof(ev));
+	ev.events = EPOLLIN;
+	ev.data.fd = _serverSd;
+	if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, _serverSd, &ev) == -1)
+	{
+		std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
+		exit(EXIT_FAILURE);
+	}
 }
 
 void Server::BroadcastMessage(const std::string& channel, const std::string& message, Client* sender)
@@ -239,6 +260,9 @@ void Server::DisconnectClient(std::map<int, Client*>::iterator& it, Client* clie
 {
 	if (client->IsConnected())
 	{
+		if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
+			std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
+		std::cout << "Client disconnected: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
 		client->Close();
 		delete client;
 		clients.erase(it++);
@@ -248,6 +272,8 @@ void Server::DisconnectClient(std::map<int, Client*>::iterator& it, Client* clie
 void Server::Run()
 {
 	int clientSd;
+	const int MAX_EVENTS = 64;
+	struct epoll_event events[MAX_EVENTS];
 	struct sockaddr_in clientAddr;
 	socklen_t clientAddrSize = sizeof(clientAddr);
 	time_t timeout = 301;
@@ -256,62 +282,79 @@ void Server::Run()
 
 	while (true)
 	{
-		clientSd = accept(_serverSd, reinterpret_cast<struct sockaddr*>(&clientAddr), &clientAddrSize);
-		if (clientSd != -1)
+		int nfds = epoll_wait(_epollFd, events, MAX_EVENTS, -1);
+		if (nfds == -1)
 		{
-			fcntl(clientSd, F_SETFL, O_NONBLOCK);
-
-			Client* newClient = new Client(clientSd, clientAddr, this);
-			_clients[clientSd] = newClient;
-			// newClient->SetAuthenticated(false);
-			std::cout << "Client connected: " << inet_ntoa(clientAddr.sin_addr) << ":" << ntohs(clientAddr.sin_port) << std::endl;
+			std::cerr << "Epoll_wait: " << strerror(errno) << std::endl;
+			exit(EXIT_FAILURE);
 		}
-
-		std::map<int, Client*>::iterator it;
-		for (it = _clients.begin(); it != _clients.end();)
+		for (int i = 0; i < nfds; ++i)
 		{
-			Client* client = it->second;
-			int bytesRead = client->ReceiveData();
-
-			if (bytesRead == 0) // Client disconnected
+			if (events[i].data.fd == _serverSd)
 			{
-				std::cout << "Client disconnected: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
-				DisconnectClient(it, client, _clients);
-			}
-			else if (bytesRead > 0)
-			{
-				std::string receivedData = client->GetReceivedData();
-				std::istringstream iss(receivedData);
-				std::string command;
-				// std::cout << receivedData << std::endl;
-				while (iss >> command)
+				clientSd = accept(_serverSd, reinterpret_cast<struct sockaddr*>(&clientAddr), &clientAddrSize);
+				if (clientSd != -1)
 				{
-					if (command == "PASS" || client->IsAuthenticated())
+					struct epoll_event ev;
+					bzero(&ev, sizeof(ev));
+					ev.events = EPOLLIN;
+					ev.data.fd = clientSd;
+					fcntl(clientSd, F_SETFL, O_NONBLOCK);
+					Client* newClient = new Client(clientSd, clientAddr, this);
+					_clients[clientSd] = newClient;
+					std::cout << "Client connected: " << inet_ntoa(clientAddr.sin_addr) << ":" << ntohs(clientAddr.sin_port) << std::endl;
+					if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, clientSd, &ev) == -1)
 					{
-						HandleCommand(client, command, iss);
-						++it;
+						std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
+						exit(EXIT_FAILURE);
 					}
-					else
-						DisconnectClient(it, client, _clients);
 				}
 			}
 			else
-				++it;
-		}
-		PingClients();
-		time_t currentTime = time(NULL);
-		for (it = _clients.begin(); it != _clients.end();)
-		{
-			
-			Client* client = it->second;
-			if (currentTime - client->GetLastActive() > timeout)
 			{
-				std::cout << "Client timeout: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
-				delete client;
-				_clients.erase(it++);
+				std::map<int, Client*>::iterator it;
+				for (it = _clients.begin(); it != _clients.end();)
+				{
+					Client* client = it->second;
+					int bytesRead = client->ReceiveData();
+
+					if (bytesRead == 0) // Client disconnected
+						DisconnectClient(it, client, _clients);
+					else if (bytesRead > 0)
+					{
+						std::string receivedData = client->GetReceivedData();
+						std::istringstream iss(receivedData);
+						std::string command;
+						// std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
+						while (iss >> command)
+						{
+							if (command == "PASS" || client->IsAuthenticated())
+							{
+								HandleCommand(client, command, iss);
+								++it;
+							}
+							else
+								DisconnectClient(it, client, _clients);
+						}
+					}
+					else
+						++it;
+				}
+				PingClients();
+				time_t currentTime = time(NULL);
+				for (it = _clients.begin(); it != _clients.end();)
+				{
+					Client* client = it->second;
+					if (currentTime - client->GetLastActive() > timeout)
+					{
+						std::cout << "Client timeout: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
+						delete client;
+						_clients.erase(it++);
+					}
+					else
+						++it;
+				}
 			}
-			else
-				++it;
 		}
 	}
 }
