@@ -330,7 +330,7 @@ void Server::Run()
 						{
 							if (_clients.size() > 0)
 							{
-								if (client->IsAuthenticated())
+								if (command == "PASS" || client->IsAuthenticated())
 								{
 									HandleCommand(client, command, iss);
 									++it;
