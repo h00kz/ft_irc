@@ -15,6 +15,7 @@
 #include <sstream>
 #include <fcntl.h>
 #include <cerrno>
+#include <csignal>
 
 enum Command {
 	NICK,
@@ -53,7 +54,6 @@ class Server
 		void		PingClients();
 		void		DisconnectClient(std::map<int, Client*>::iterator& it, Client* client, std::map<int, Client*>& clients);
 		void 		HandleCommand(Client* client, const std::string& command, std::istringstream& iss);
-
 
 		std::map<int, Client*>	_clients; // k: op_id, v: client
 		std::vector<std::string>	_channels;

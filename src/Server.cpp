@@ -41,11 +41,9 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 				client->SetAuthenticated(true);
 			else
 			{
-				std::cout << "Client not authenticated: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
+				std::cout << "Client not authenticated: " << inet_ntoa(client->GetAddress().sin_addr) << " sock: " << client->GetSocketDescriptor() << std::endl;
 				if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
-				{
 					std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
-				}
 				client->Close();
 				_clients.erase(client->GetSocketDescriptor());
 				return;
@@ -135,6 +133,7 @@ void Server::Close()
 		_serverSd = -1;
 	}
 }
+
 const std::map<int, Client*>& Server::GetClients() const
 {
 	return _clients;
@@ -277,12 +276,13 @@ void Server::Run()
 	struct sockaddr_in clientAddr;
 	socklen_t clientAddrSize = sizeof(clientAddr);
 	time_t timeout = 301;
+	
 
 	std::cout << "Server started on " << _port << " port .." << std::endl;
 
 	while (true)
 	{
-		int nfds = epoll_wait(_epollFd, events, MAX_EVENTS, -1);
+		int nfds = epoll_wait(_epollFd, events, MAX_EVENTS, 500);
 		if (nfds == -1)
 		{
 			std::cerr << "Epoll_wait: " << strerror(errno) << std::endl;
@@ -328,13 +328,16 @@ void Server::Run()
 						// std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
 						while (iss >> command)
 						{
-							if (command == "PASS" || client->IsAuthenticated())
+							if (_clients.size() > 0)
 							{
-								HandleCommand(client, command, iss);
-								++it;
+								if (client->IsAuthenticated())
+								{
+									HandleCommand(client, command, iss);
+									++it;
+								}
+								else
+									DisconnectClient(it, client, _clients);
 							}
-							else
-								DisconnectClient(it, client, _clients);
 						}
 					}
 					else

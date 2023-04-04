@@ -6,7 +6,7 @@
 #    By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/28 16:38:05 by jlarrieu          #+#    #+#              #
-#    Updated: 2023/04/04 10:50:56 by jlarrieu         ###   ########.fr        #
+#    Updated: 2023/04/04 16:46:16 by jlarrieu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,7 +18,7 @@ SRCS	=	src/main.cpp \
 			src/Server.cpp 
 
 OBJ			= $(SRCS:.cpp=.o)
-NAME	=	irc
+NAME	=	ircserv
 RM		=	rm -f
 bold	:= $(shell tput bold)
 green	:= $(shell tput setaf 2)
@@ -31,7 +31,7 @@ all: $(NAME)
 
 $(NAME): $(OBJ)
 	@$(CC) ${OBJ} -o $(NAME) $(CFLAGS)
-	@printf "[$(green)✔$(sgr0)] $(bold)$(green)Compiling Ft_irc finished!$(sgr0)\n"
+	@printf "[$(green)✔$(sgr0)] $(bold)$(green)Compiling ircserv finished!$(sgr0)\n"
 
 clean:
 			@echo "-----  Cleaning all objects...  -----"

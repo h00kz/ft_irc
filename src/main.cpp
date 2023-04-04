@@ -3,17 +3,17 @@
 
 Server* g_server = NULL;
 
-void handle_sigint(int signal)
+void mhandleSigint(int signal)
 {
 	if (g_server != NULL)
 		g_server->Close();
-    std::cout << "\nTerminating the server." << std::endl;
-    exit(signal);
+	std::cout << "\nTerminating the server." << std::endl;
+	exit(signal);
 }
 
 int main(int argc, char const *argv[])
 {
-	signal(SIGINT, handle_sigint);
+	signal(SIGINT, mhandleSigint);
 	if (argc != 3)
 	{
 		std::cout << "Usage: ./irc <Port> <Password>" << std::endl;
