@@ -32,7 +32,8 @@ Command ParseCommand(const std::string& commandStr)
 
 void Server::HandleCommand(Client* client, const std::string& command, std::istringstream& iss)
 {
-	switch (ParseCommand(command)) {
+	switch (ParseCommand(command))
+	{
 		case PASS: {
 			std::string password;
 			iss >> password;
@@ -196,7 +197,8 @@ void Server::Init()
 void Server::BroadcastMessage(const std::string& channel, const std::string& message, Client* sender)
 {
 	std::map<int, Client*>::iterator it;
-	for (it = _clients.begin(); it != _clients.end(); ++it) {
+	for (it = _clients.begin(); it != _clients.end(); ++it)
+	{
 		Client* client = it->second;
 		if (client != sender && client->IsInChannel(channel))
 			client->SendData(message);
@@ -206,7 +208,8 @@ void Server::BroadcastMessage(const std::string& channel, const std::string& mes
 void Server::SendPrivateMessage(const std::string& target, const std::string& message, Client* sender)
 {
 	std::map<int, Client*>::iterator it;
-	for (it = _clients.begin(); it != _clients.end(); ++it) {
+	for (it = _clients.begin(); it != _clients.end(); ++it)
+	{
 		Client* client = it->second;
 		if (client != sender && client->GetNickname() == target) 
 			client->SendData(message);
