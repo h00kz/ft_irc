@@ -11,11 +11,12 @@
 # **************************************************************************** #
 
 CC		=	c++
-CFLAGS	=	-g3 -Wall -Wextra -Werror -std=c++98
+CFLAGS	=	-g #-Wall -Wextra -Werror -std=c++98
 
-SRCS	=	src/main.cpp \
-			src/Client.cpp \
-			src/Server.cpp 
+SRCS	=	src/main.cpp	\
+			src/Client.cpp	\
+			src/Server.cpp	\
+			src/Channel.cpp
 
 OBJ			= $(SRCS:.cpp=.o)
 NAME	=	ircserv

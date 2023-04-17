@@ -8,6 +8,7 @@ Client::Client(int socketDescriptor, struct sockaddr_in address, Server* server)
 	UpdateLastActive();
 	_server = server;
 	_authenticated = false;
+	_username = "";
 }
 
 Client::~Client()
@@ -107,6 +108,7 @@ std::string const &Client::GetUsername() const
 	return _username;
 }
 
+/*
 void Client::JoinChannel(const std::string &channel)
 {
 	if (this->IsInChannel(channel))
@@ -115,6 +117,7 @@ void Client::JoinChannel(const std::string &channel)
     if (_server)
         _server->AddChannel(channel);
 }
+*/
 
 void Client::LeaveChannel(const std::string &channel)
 {

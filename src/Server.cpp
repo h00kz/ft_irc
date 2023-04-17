@@ -34,21 +34,8 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 	switch (ParseCommand(command))
 	{
 		case PASS: {
-			std::string password;
-			iss >> password;
-			std::cout << "PASS called\n";
-			if (password == _serverPasswd)
-				client->SetAuthenticated(true);
-			else
-			{
-				std::cout << "Client not authenticated: " << inet_ntoa(client->GetAddress().sin_addr) << " sock: " << client->GetSocketDescriptor() << std::endl;
-				if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
-					std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
-				client->Close();
-				_clients.erase(client->GetSocketDescriptor());
-				return;
-			}
-			break;
+			client->SendData("Error you may not reregister\n");
+			return ;
 		}
 		case NICK: {
 			std::string nickname;
@@ -80,7 +67,8 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 		case JOIN: {
 			std::string channel;
 			iss >> channel;
-			client->JoinChannel(channel);
+			// client->JoinChannel(channel);
+			this->JoinChannel(client, channel);
 			std::cout << "Client joined channel: " << channel << std::endl;
 			break;
 		}
@@ -114,7 +102,12 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 			break;
 		}
 		case UNKNOWN: {
-			std::cout << "Unknown command: " << command << std::endl;
+			if (client->GetChannels().size() != 0)
+			{
+				std::cout << client->GetChannels().at(0) << " " << client->GetNickname() << ": " << command << std::endl;
+			}
+			else
+				std::cout << "Unknown command: " << command << std::endl;
 			break;
 		}
 	}
@@ -141,21 +134,51 @@ const std::map<int, Client*>& Server::GetClients() const
 
 void Server::RemoveChannel(const std::string &channel)
 {
-	std::vector<std::string>::iterator it = std::find(_channels.begin(), _channels.end(), channel);
-	if (it != _channels.end())
-	{
-		_channels.erase(it);
-		std::cout << "Channel removed: " << channel << std::endl;
-	}
+	int	channel_pos = findChannel(channel);
+
+	if (channel_pos != -1)
+		this->_channels.erase(this->_channels.begin() + channel_pos);
+	else
+		std::cout << "This channel does not exist" << std::endl;
 }
 
-void Server::AddChannel(std::string const &channel)
+/*
+void Server::AddChannel(std::string const &channel, )
 {
-	if (std::find(_channels.begin(), _channels.end(), channel) == _channels.end())
+	if (findChannel(channel) == -1)
 	{
 		_channels.push_back(channel);
 		std::cout << "Channel added: " << channel << std::endl;
 	}
+}
+*/
+
+int	Server::findChannel(std::string channel)
+{
+	int	i = 0;
+
+	for (std::vector<Channel *>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+    {
+        if ((*it)->getName() == channel)
+            return (i);
+		i++;
+	}
+    return (-1);
+}
+
+Channel    *Server::createChannel(std::string name, Client *client)
+{
+	Channel	*channel = new Channel(name, client);
+	return (channel);
+}
+
+void		Server::JoinChannel(Client *client, std::string channel)
+{
+	int channel_pos = this->findChannel(channel);
+	if (channel_pos == -1)
+		this->_channels.push_back(createChannel(channel, client));
+	else
+		this->_channels.at(channel_pos)->addClient(client);
 }
 
 Server::~Server()
@@ -268,6 +291,92 @@ void Server::DisconnectClient(std::map<int, Client*>::iterator& it, Client* clie
 	}
 }
 
+void Server::HandleAuthentification(Client* client, const std::string& command, std::istringstream& iss)
+{
+	switch (ParseCommand(command))
+	{
+		case PASS:
+		{
+			std::string password;
+			iss >> password;
+			std::cout << "PASS called\n";
+			if (password == _serverPasswd && !client->IsAuthenticated())
+			{
+			 	client->SetAuthenticated(true);
+				client->SendData("u find the pass\n");
+			}
+			else if (client->IsAuthenticated())
+			{
+				client->SendData("Error you may not reregister\n");
+				return ;
+			}
+			else if (password == "USER" || password == "")
+			{
+				client->SendData("Error PASS not enough parameters\n");
+				if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
+					std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
+				client->Close();
+				_clients.erase(client->GetSocketDescriptor());
+				return ;
+			}
+			else
+			{
+				std::cout << "Client not authenticated: " << inet_ntoa(client->GetAddress().sin_addr) << " sock: " << client->GetSocketDescriptor() << std::endl;
+				if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
+					std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
+				client->Close();
+				_clients.erase(client->GetSocketDescriptor());
+				return;
+			}
+			break;
+		}
+		case USER:
+		{
+			if (client->IsAuthenticated())
+			{
+				std::string username, host, server, realname;
+				iss >> username >> host >> server;
+
+				std::getline(iss, realname);
+				if (!realname.empty() && realname[0] == ':')
+					realname.erase(0, 1);
+				client->SetUsername(username);
+				client->SetHost(host);
+				client->SetServer(server);
+				client->SetRealname(realname);
+				client->SendData("good username\n");
+
+				std::cout << "USER called\n";
+				std::cout << "Client set username: " << username << std::endl;
+				std::cout << "Client set host: " << host << std::endl;
+				std::cout << "Client set server: " << server << std::endl;
+				std::cout << "Client set real name: " << realname << std::endl;
+
+				break;
+			}
+			else
+			{
+				std::cout << "Client not authenticated: " << inet_ntoa(client->GetAddress().sin_addr) << " sock: " << client->GetSocketDescriptor() << std::endl;
+				if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
+					std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
+				client->Close();
+				_clients.erase(client->GetSocketDescriptor());
+				return;
+			}
+		}
+			default : 
+		{
+			std::cout << "Client not authenticated: " << inet_ntoa(client->GetAddress().sin_addr) << " sock: " << client->GetSocketDescriptor() << std::endl;
+			if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
+				std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
+			client->Close();
+			_clients.erase(client->GetSocketDescriptor());
+			return;
+		break;
+		}
+	}
+}
+
 void Server::Run()
 {
 	int clientSd;
@@ -325,18 +434,21 @@ void Server::Run()
 						std::string receivedData = client->GetReceivedData();
 						std::istringstream iss(receivedData);
 						std::string command;
-						// std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
+						std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
 						while (iss >> command)
 						{
 							if (_clients.size() > 0)
 							{
-								if (command == "PASS" || client->IsAuthenticated())
+								if (client->IsAuthenticated() && client->GetUsername() != "")
 								{
 									HandleCommand(client, command, iss);
 									++it;
 								}
 								else
-									DisconnectClient(it, client, _clients);
+								{
+									std::cout << command;
+									HandleAuthentification(client, command, iss);
+								}
 							}
 						}
 					}
