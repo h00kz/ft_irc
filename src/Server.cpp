@@ -132,7 +132,7 @@ void Server::Close()
 }
 
 const std::map<int, Client*>& Server::GetClients() const
-{
+{ 
 	return _clients;
 }
 
