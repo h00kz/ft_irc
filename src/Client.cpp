@@ -1,5 +1,5 @@
 #include "Client.hpp"
-#include "Server.hpp"
+#include "Server/Server.hpp"
 
 
 Client::Client(int socketDescriptor, struct sockaddr_in address, Server* server)
