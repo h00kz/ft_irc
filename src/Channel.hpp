@@ -12,6 +12,11 @@ typedef struct s_client
     Client  *client;
     bool    op;
     bool    online;
+    bool    ;
+    bool    ;
+    bool    ;
+    bool    ;
+    bool    ;
 
 }   t_client;
 /*
@@ -32,16 +37,17 @@ k - définit la clé du canal (mot de passe)
 class Channel
 {
     private :
-        t_client    *_hostClient;
-        std::vector<t_client *>    _clients;
-        std::string _name;
-        std::string _topic;
+        t_client                    *_hostClient;
+        std::vector<t_client *>     _clients;
+        std::string                 _name;
+        std::string                 _topic;
         // status     
         
 
     public :
         ~Channel();
         Channel(std::string name, Client *client);
+        void    setMode(std::string);
 		void    addClient(Client * client);
         int     findClient(Client *client);
         void    sendMessage(std::string message);  //Se balade dans le tablo de client et chaque fois que client[i].online = true, lui balance le message

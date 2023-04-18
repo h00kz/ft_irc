@@ -38,6 +38,10 @@ Channel::~Channel()
     }
 }
 
+void    Channel::setMode(std::string new_mode)
+{
+
+}
 
 void    Channel::addClient(Client *client)
 {

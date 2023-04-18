@@ -27,7 +27,9 @@ enum Command {
 	PART,
 	PASS,
 	PRIVMSG,
-	UNKNOWN
+	UNKNOWN,
+	LIST,
+	MODE
 };
 
 class Server

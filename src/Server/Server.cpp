@@ -24,6 +24,10 @@ Command ParseCommand(const std::string& commandStr)
 		return PASS;
 	} else if (commandStr == "PRIVMSG") {
 		return PRIVMSG;
+	} else if (commandStr == "LIST") {
+		return LIST;
+	}else if (commandStr == "MODE") {
+		return MODE;
 	} else {
 		return UNKNOWN;
 	}
@@ -99,6 +103,21 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 			iss >> channel;
 			client->LeaveChannel(channel);
 			std::cout << "Client leave channel: " << channel << std::endl;
+			break;
+		}
+		case LIST: {
+			client->SendData("channels available at the moment : \n");
+			for (std::vector<Channel *>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
+				client->SendData((*it)->getName() + "\n");
+			break;
+		}case MODE: {
+			std::string mode;
+			iss >> mode;
+			if (mode.find("+") == 1)
+			{
+				if (_channels.at(0)->findClient(client) != -1)
+				 	_channels.at(0)->setMode("on ajoute zebi");
+			}
 			break;
 		}
 		case UNKNOWN: {
