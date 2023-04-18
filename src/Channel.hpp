@@ -12,11 +12,12 @@ typedef struct s_client
     Client  *client;
     bool    op;
     bool    online;
-    bool    ;
-    bool    ;
-    bool    ;
-    bool    ;
-    bool    ;
+    bool    Pierre;
+    bool    ta;
+    bool    pas;
+    bool    rempli;
+    bool    les;
+    bool    bouls;
 
 }   t_client;
 /*

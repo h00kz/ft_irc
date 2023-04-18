@@ -3,20 +3,30 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+         #
+#    By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/28 16:38:05 by jlarrieu          #+#    #+#              #
-#    Updated: 2023/04/04 16:46:16 by jlarrieu         ###   ########.fr        #
+#    Updated: 2023/04/18 14:42:07 by ffeaugas         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC		=	c++
 CFLAGS	=	-g #-Wall -Wextra -Werror -std=c++98
 
-SRCS	=	src/main.cpp	\
-			src/Client.cpp	\
-			src/Server.cpp	\
-			src/Channel.cpp
+SRCS	=	src/main.cpp				\
+			src/Client.cpp				\
+			src/Channel.cpp				\
+			src/Server/Server.cpp		\
+			src/Server/cmd/Join.cpp		\
+			src/Server/cmd/List.cpp		\
+			src/Server/cmd/Mode.cpp		\
+			src/Server/cmd/Nick.cpp		\
+			src/Server/cmd/Part.cpp		\
+			src/Server/cmd/Pass.cpp		\
+			src/Server/cmd/Ping.cpp		\
+			src/Server/cmd/Pong.cpp		\
+			src/Server/cmd/PrivMsg.cpp	\
+			src/Server/cmd/User.cpp
 
 OBJ			= $(SRCS:.cpp=.o)
 NAME	=	ircserv

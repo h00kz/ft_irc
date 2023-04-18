@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "Server/Server.hpp"
 #include <csignal>
 
 Server* g_server = NULL;
