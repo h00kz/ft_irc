@@ -52,7 +52,9 @@ class Client
 
 		void SetAuthenticated(bool b);
 		bool IsAuthenticated();
+		
 	private:
+	
 		int _socketDescriptor;
 		struct sockaddr_in _address;
 		Server* _server;

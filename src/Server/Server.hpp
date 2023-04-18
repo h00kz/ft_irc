@@ -1,6 +1,7 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
+#include "Channel.hpp"
 #include <iostream>
 #include <map>
 #include <sys/socket.h>
@@ -26,7 +27,9 @@ enum Command {
 	PART,
 	PASS,
 	PRIVMSG,
-	UNKNOWN
+	UNKNOWN,
+	LIST,
+	MODE
 };
 
 class Server
@@ -45,7 +48,7 @@ class Server
 		void		BroadcastMessage(const std::string& channel, const std::string& message, Client* sender);
 		void		SendPrivateMessage(const std::string& target, const std::string& message, Client* sender);
 		void 		RemoveChannel(const std::string &channel);
-		void		AddChannel(std::string const& channel);
+//		void		AddChannel(std::string const& channel);
 		void 		Close();
 
 	private:
@@ -54,9 +57,14 @@ class Server
 		void		PingClients();
 		void		DisconnectClient(std::map<int, Client*>::iterator& it, Client* client, std::map<int, Client*>& clients);
 		void 		HandleCommand(Client* client, const std::string& command, std::istringstream& iss);
+		void		HandleAuthentification(Client* client, const std::string& command, std::istringstream& iss);		
+		int			findChannel(std::string channel);
+		void		JoinChannel(Client *client, std::string channel);
+		Channel		*createChannel(std::string name, Client *client);
+
 
 		std::map<int, Client*>	_clients; // k: op_id, v: client
-		std::vector<std::string>	_channels;
+		std::vector<Channel*>	_channels;
 		sockaddr_in				_servAddr;
 		std::string const		_serverPasswd;
 		std::string const		_serverName;
