@@ -38,11 +38,13 @@ class Channel
         std::string _topic;
         // status     
         
+
     public :
+        ~Channel();
         Channel(std::string name, Client *client);
 		void    addClient(Client * client);
         int     findClient(Client *client);
-        void    sendMessage(std::string &message);  //Se balade dans le tablo de client et chaque fois que client[i].online = true, lui balance le message
+        void    sendMessage(std::string message);  //Se balade dans le tablo de client et chaque fois que client[i].online = true, lui balance le message
         std::string getName(void);
 };
 

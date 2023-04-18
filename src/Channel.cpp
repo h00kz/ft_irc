@@ -1,8 +1,12 @@
 #include "Channel.hpp"
 
 
-void    Channel::sendMessage(std::string &message)
+void    Channel::sendMessage(std::string message)
 {
+    for (std::vector<t_client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+    {
+        (*it)->client->SendData(message);
+    }
 
 }  //Se balade dans le tablo de client et chaque fois que client[i].online = true, lui balance le message
 
@@ -25,16 +29,24 @@ int     Channel::findClient(Client *client)
     return (-1);
 }
 
+Channel::~Channel()
+{
+    for (std::vector<t_client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+    {
+        if (*it != NULL)
+            delete (*it);
+    }
+}
+
+
 void    Channel::addClient(Client *client)
 {
-    t_client *new_client;
+    t_client *new_client = new t_client;
 
     new_client->client = client;
     int client_pos = this->findClient(client);
-    if (client_pos != -1)
-    {
+    if (client_pos == -1)
         this->_clients.push_back(new_client);
-    }
     else
         std::cout << "Client is already in this channel" << std::endl;
 }

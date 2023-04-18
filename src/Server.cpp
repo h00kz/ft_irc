@@ -102,9 +102,13 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 			break;
 		}
 		case UNKNOWN: {
-			if (client->GetChannels().size() != 0)
+			if (this->_channels.size() != 0)
 			{
-				std::cout << client->GetChannels().at(0) << " " << client->GetNickname() << ": " << command << std::endl;
+				std::cout << "coucou toi\n";
+				if (client->GetNickname() == "")
+					this->_channels.at(0)->sendMessage(this->_channels.at(0)->getName() + " " + client->GetUsername() + " : " + command + "\n");
+				else
+					this->_channels.at(0)->sendMessage(this->_channels.at(0)->getName() + " " + client->GetNickname() + " : " + command + "\n");
 			}
 			else
 				std::cout << "Unknown command: " << command << std::endl;
@@ -157,7 +161,8 @@ int	Server::findChannel(std::string channel)
 {
 	int	i = 0;
 
-	for (std::vector<Channel *>::iterator it = _channels.begin(); it != _channels.end(); ++it)
+
+	for (std::vector<Channel *>::iterator it = _channels.begin(); it < _channels.end(); it++)
     {
         if ((*it)->getName() == channel)
             return (i);
@@ -176,9 +181,15 @@ void		Server::JoinChannel(Client *client, std::string channel)
 {
 	int channel_pos = this->findChannel(channel);
 	if (channel_pos == -1)
+	{
+		std::cout << channel_pos << std::endl;
 		this->_channels.push_back(createChannel(channel, client));
+	}
 	else
+	{
+		std::cout << "came saoule\n";
 		this->_channels.at(channel_pos)->addClient(client);
+	}
 }
 
 Server::~Server()
@@ -345,13 +356,8 @@ void Server::HandleAuthentification(Client* client, const std::string& command, 
 				client->SetServer(server);
 				client->SetRealname(realname);
 				client->SendData("good username\n");
-
 				std::cout << "USER called\n";
 				std::cout << "Client set username: " << username << std::endl;
-				std::cout << "Client set host: " << host << std::endl;
-				std::cout << "Client set server: " << server << std::endl;
-				std::cout << "Client set real name: " << realname << std::endl;
-
 				break;
 			}
 			else
@@ -446,7 +452,7 @@ void Server::Run()
 								}
 								else
 								{
-									std::cout << command;
+									std::cout << "tu passe ici debile\n";
 									HandleAuthentification(client, command, iss);
 								}
 							}
