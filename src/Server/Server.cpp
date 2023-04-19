@@ -1,5 +1,5 @@
 #include "Server.hpp"
-
+#include "../utils.h"
 static volatile bool quitStatus = false;
 
 void shandleSigint(int signal)
@@ -168,8 +168,7 @@ bool Server::HandleAuthentification(Client* client, const std::string& command, 
 				client->SendData("Username must be set\n");
 		}
 	}
-	iss.clear();
-	iss.str("");
+	while(iss.get() != '\n');
 	return true;
 }
 
