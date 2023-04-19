@@ -2,15 +2,12 @@
 #include <csignal>
 
 Server* g_server = NULL;
-bool	quitStatus = false;
-
 
 void mhandleSigint(int signal)
 {
 	if (g_server != NULL)
 		g_server->Close();
 	std::cout << "\nTerminating the server." << std::endl;
-	quitStatus = true;
 	exit(signal);
 }
 

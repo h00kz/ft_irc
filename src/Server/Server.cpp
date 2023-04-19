@@ -6,11 +6,21 @@
 /*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:57 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/18 17:50:53 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/04/19 11:49:43 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+
+static volatile bool quitStatus = false;
+
+void shandleSigint(int signal)
+{
+	std::cout << "\nTerminating the server." << std::endl;
+	quitStatus = true;
+	g_server->Close();
+	exit(signal);
+}
 
 Server::Server(int port, std::string const &passwd)
 	: _serverPasswd(passwd), _serverName("MyServer"), _port(port)
@@ -150,13 +160,16 @@ void Server::Close()
 {
 	if (_serverSd != -1)
 	{
-		std::map<int, Client*>::iterator it = _clients.begin();
-		for (;it != _clients.end();)
-			DisconnectClient(it->second, _clients);
+		if (_clients.size() > 0)
+		{
+			std::cout << "tu passe pas la\n";
+			std::map<int, Client*>::iterator it = _clients.begin();
+			for (;it != _clients.end();)
+				DisconnectClient(it->second, _clients);
+		}
 		std::cout << std::endl << "_clients size : " << _clients.size()<< " content(sockD) : " << std::endl;
 		close(_serverSd);
 		close(_epollFd);
-		_serverSd = -1;
 	}
 }
 
@@ -229,15 +242,15 @@ void Server::SendPrivateMessage(const std::string& target, const std::string& me
 
 void Server::DisconnectClient(Client* client, std::map<int, Client*>& clients)
 {
-	if (client->IsConnected())
-	{
+	// if (client->IsConnected())
+	// {
 		if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
 			std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
 		std::cout << "Client disconnected: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
 		client->Close();
 		clients.erase(client->GetSocketDescriptor());
-		delete client;
-	}
+		// delete client;
+	// }
 }
 
 bool Server::HandleAuthentification(Client* client, const std::string& command, std::istringstream& iss)
@@ -287,6 +300,7 @@ void Server::Run()
 
 	while (quitStatus != true)
 	{
+		std::signal(SIGINT, shandleSigint);
 		int nfds = epoll_wait(_epollFd, events, MAX_EVENTS, 500);
 		if (nfds == -1)
 		{
@@ -333,7 +347,6 @@ void Server::Run()
 						std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
 						while (iss >> command)
 						{
-							std::cout << "on passe la\n";
 							if (_clients.size() > 0)
 							{
 								if (client->IsAuthenticated() && client->GetUsername() != "")
@@ -342,10 +355,7 @@ void Server::Run()
 									++it;
 								}
 								else
-								{
-									// std::cout << "tu passe ici debile\n";
 									if (!HandleAuthentification(client, command, iss)) break;
-								}
 							}
 						}
 					}

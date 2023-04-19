@@ -173,10 +173,7 @@ int Client::GetSocketDescriptor() const
 void Client::Close()
 {
 	if (_socketDescriptor != -1)
-	{
 		close(_socketDescriptor);
-		_socketDescriptor = -1;
-	}
 }
 
 void Client::SetAuthenticated(bool b)
