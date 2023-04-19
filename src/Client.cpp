@@ -9,6 +9,7 @@ Client::Client(int socketDescriptor, struct sockaddr_in address, Server* server)
 	_server = server;
 	_authenticated = false;
 	_username = "";
+	_nickname = "";
 }
 
 Client::~Client()
