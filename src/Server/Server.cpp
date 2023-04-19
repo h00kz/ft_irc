@@ -150,7 +150,6 @@ void Server::Close()
 	{
 		if (_clients.size() > 0)
 		{
-			std::cout << "tu passe pas la\n";
 			std::map<int, Client*>::iterator it = _clients.begin();
 			for (;it != _clients.end();)
 				DisconnectClient(it->second, _clients);
@@ -233,7 +232,7 @@ void Server::DisconnectClient(Client* client, std::map<int, Client*>& clients)
 	// if (client->IsConnected())
 	// {
 		if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
-			std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
+			std::cerr << "Epoll_ctl DISCO: " << strerror(errno) << std::endl;
 		std::cout << "Client disconnected: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
 		client->Close();
 		clients.erase(client->GetSocketDescriptor());
@@ -329,9 +328,11 @@ void Server::Run()
 					{
 						Client* client = it->second;
 						int bytesRead = client->ReceiveData();
-
 						if (bytesRead == 0) // Client disconnected
+						{
 							DisconnectClient(client, _clients);
+							it = _clients.begin();
+						}
 						else if (bytesRead > 0)
 						{
 							std::string receivedData = client->GetReceivedData();
