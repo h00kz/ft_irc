@@ -161,8 +161,6 @@ bool Server::HandleAuthentification(Client* client, const std::string& command, 
 		}
 		default :
 		{
-			iss.clear();
-			iss.str("");
 			client->SendData("You're not fully authenticated :\n");
 			if (client->GetNickname() == "")
 				client->SendData("Nickname must be set\n");
@@ -170,6 +168,8 @@ bool Server::HandleAuthentification(Client* client, const std::string& command, 
 				client->SendData("Username must be set\n");
 		}
 	}
+	iss.clear();
+	iss.str("");
 	return true;
 }
 
