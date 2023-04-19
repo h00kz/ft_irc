@@ -105,11 +105,12 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 			break;
 		}
 		case NICK: {
+			client->SendData("Nickname already set\n");
 			HandleNick(client, iss);
 			break;
 		}
 		case USER: {
-			client->SendData("User already set\n");
+			HandleUser(client, iss);
 			break;
 		}
 		case JOIN: {

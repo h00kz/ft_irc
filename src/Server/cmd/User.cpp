@@ -36,7 +36,7 @@
 
 void    Server::HandleUser(Client *client, std::istringstream &iss)
 {
-    if (client->IsAuthenticated())
+    if (client->IsAuthenticated() == true)
     {
         std::string username, host, server, realname;
         iss >> username >> host >> server;
