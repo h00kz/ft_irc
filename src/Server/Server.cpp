@@ -1,229 +1,19 @@
 #include "Server.hpp"
 
+static volatile bool quitStatus = false;
+
+void shandleSigint(int signal)
+{
+	std::cout << "\nTerminating the server." << std::endl;
+	quitStatus = true;
+	g_server->Close();
+	exit(signal);
+}
+
 Server::Server(int port, std::string const &passwd)
 	: _serverPasswd(passwd), _serverName("MyServer"), _port(port)
 {
-	Init();
-}
-
-Command ParseCommand(const std::string& commandStr)
-{
-	if (commandStr == "NICK") {
-		return NICK;
-	} else if (commandStr == "USER") {
-		return USER;
-	} else if (commandStr == "JOIN") {
-		return JOIN;
-	} else if (commandStr == "PING") {
-		return PING;
-	} else if (commandStr == "PONG") {
-		return PONG;
-	} else if (commandStr == "PART") {
-		return PART;
-	} else if (commandStr == "PASS") {
-		return PASS;
-	} else if (commandStr == "PRIVMSG") {
-		return PRIVMSG;
-	} else if (commandStr == "LIST") {
-		return LIST;
-	}else if (commandStr == "MODE") {
-		return MODE;
-	} else {
-		return UNKNOWN;
-	}
-}
-
-void Server::HandleCommand(Client* client, const std::string& command, std::istringstream& iss)
-{
-	switch (ParseCommand(command))
-	{
-		case PASS: {
-			client->SendData("Error you may not reregister\n");
-			return ;
-		}
-		case NICK: {
-			std::string nickname;
-			iss >> nickname;
-			client->SetNickname(nickname);
-			std::cout << "NICK called\n";
-			std::cout << "Client set nickname: " << nickname << std::endl;
-			break;
-		}
-		case USER: {
-			std::string username, host, server, realname;
-			iss >> username >> host >> server;
-
-			std::getline(iss, realname);
-			if (!realname.empty() && realname[0] == ':')
-				realname.erase(0, 1);
-			client->SetUsername(username);
-			client->SetHost(host);
-			client->SetServer(server);
-			client->SetRealname(realname);
-
-			std::cout << "USER called\n";
-			std::cout << "Client set username: " << username << std::endl;
-			std::cout << "Client set host: " << host << std::endl;
-			std::cout << "Client set server: " << server << std::endl;
-			std::cout << "Client set real name: " << realname << std::endl;
-			break;
-		}
-		case JOIN: {
-			std::string channel;
-			iss >> channel;
-			// client->JoinChannel(channel);
-			this->JoinChannel(client, channel);
-			std::cout << "Client joined channel: " << channel << std::endl;
-			break;
-		}
-		case PING: {
-			client->UpdateLastActive();
-			std::string response = "PONG\r\n";
-			client->SendData(response);
-			std::cout << "PONG sent to " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
-			break;
-		}
-		case PONG: {
-			client->UpdateLastActive();
-			std::cout << "PING recieve from " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
-			break;
-		}
-		case PRIVMSG: {
-			std::string target, message;
-			iss >> target;
-			getline(iss, message);
-			if (!message.empty() && message[0] == ':')
-				message.erase(0, 1);
-			client->SendMessage(target, message);
-			std::cout << "Client sent message to " << target << ": " << message << std::endl;
-			break;
-		}
-		case PART: {
-			std::string channel;
-			iss >> channel;
-			client->LeaveChannel(channel);
-			std::cout << "Client leave channel: " << channel << std::endl;
-			break;
-		}
-		case LIST: {
-			client->SendData("channels available at the moment : \n");
-			for (std::vector<Channel *>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
-				client->SendData((*it)->getName() + "\n");
-			break;
-		}case MODE: {
-			std::string mode;
-			iss >> mode;
-			if (mode.find("+") == 1)
-			{
-				if (_channels.at(0)->findClient(client) != -1)
-				 	_channels.at(0)->setMode("on ajoute zebi");
-			}
-			break;
-		}
-		case UNKNOWN: {
-			if (this->_channels.size() != 0)
-			{
-				std::cout << "coucou toi\n";
-				if (client->GetNickname() == "")
-					this->_channels.at(0)->sendMessage(this->_channels.at(0)->getName() + " " + client->GetUsername() + " : " + command + "\n");
-				else
-					this->_channels.at(0)->sendMessage(this->_channels.at(0)->getName() + " " + client->GetNickname() + " : " + command + "\n");
-			}
-			else
-				std::cout << "Unknown command: " << command << std::endl;
-			break;
-		}
-	}
-}
-
-void Server::Close()
-{
-	if (_serverSd != -1)
-	{
-		std::map<int, Client*>::iterator it = _clients.begin();
-		for (;it != _clients.end();)
-			DisconnectClient(it, it->second, _clients);
-		std::cout << std::endl << "_clients size : " << _clients.size()<< " content(sockD) : " << std::endl;
-		close(_serverSd);
-		close(_epollFd);
-		_serverSd = -1;
-	}
-}
-
-const std::map<int, Client*>& Server::GetClients() const
-{ 
-	return _clients;
-}
-
-void Server::RemoveChannel(const std::string &channel)
-{
-	int	channel_pos = findChannel(channel);
-
-	if (channel_pos != -1)
-		this->_channels.erase(this->_channels.begin() + channel_pos);
-	else
-		std::cout << "This channel does not exist" << std::endl;
-}
-
-/*
-void Server::AddChannel(std::string const &channel, )
-{
-	if (findChannel(channel) == -1)
-	{
-		_channels.push_back(channel);
-		std::cout << "Channel added: " << channel << std::endl;
-	}
-}
-*/
-
-int	Server::findChannel(std::string channel)
-{
-	int	i = 0;
-
-
-	for (std::vector<Channel *>::iterator it = _channels.begin(); it < _channels.end(); it++)
-    {
-        if ((*it)->getName() == channel)
-            return (i);
-		i++;
-	}
-    return (-1);
-}
-
-Channel    *Server::createChannel(std::string name, Client *client)
-{
-	Channel	*channel = new Channel(name, client);
-	return (channel);
-}
-
-void		Server::JoinChannel(Client *client, std::string channel)
-{
-	int channel_pos = this->findChannel(channel);
-	if (channel_pos == -1)
-	{
-		std::cout << channel_pos << std::endl;
-		this->_channels.push_back(createChannel(channel, client));
-	}
-	else
-	{
-		std::cout << "came saoule\n";
-		this->_channels.at(channel_pos)->addClient(client);
-	}
-}
-
-Server::~Server()
-{
-	std::map<int, Client*>::iterator it;
-	for (it = _clients.begin(); it != _clients.end(); ++it)
-	{
-		delete it->second;
-	}
-	close(_serverSd);
-}
-
-void Server::Init()
-{
-	_serverSd = socket(AF_INET, SOCK_STREAM, 0);
+		_serverSd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serverSd == -1)
 	{
 		std::cerr << "Socket: " << strerror(errno) << std::endl;
@@ -267,6 +57,155 @@ void Server::Init()
 	}
 }
 
+Command ParseCommand(const std::string& commandStr)
+{
+	if (commandStr == "NICK") {
+		return NICK;
+	} else if (commandStr == "USER") {
+		return USER;
+	} else if (commandStr == "JOIN") {
+		return JOIN;
+	} else if (commandStr == "PING") {
+		return PING;
+	} else if (commandStr == "PONG") {
+		return PONG;
+	} else if (commandStr == "PART") {
+		return PART;
+	} else if (commandStr == "PASS") {
+		return PASS;
+	} else if (commandStr == "PRIVMSG") {
+		return PRIVMSG;
+	} else if (commandStr == "LIST") {
+		return LIST;
+	}else if (commandStr == "MODE") {
+		return MODE;
+	} else {
+		return UNKNOWN;
+	}
+}
+
+void Server::HandleCommand(Client* client, const std::string& command, std::istringstream& iss)
+{
+	switch (ParseCommand(command))
+	{
+		case PASS: {
+			client->SendData("You should not reregister\n");
+			break;
+		}
+		case NICK: {
+			HandleNick(client, iss);
+			break;
+		}
+		case USER: {
+			client->SendData("User already set\n");
+			break;
+		}
+		case JOIN: {
+			HandleJoin(client, iss);
+			break;
+		}
+		case PING: {
+			HandlePing(client);
+			break;
+		}
+		case PONG: {
+			HandlePong(client);
+			break;
+		}
+		case PRIVMSG: {
+			HandlePrivMsg(client, iss);
+			break;
+		}
+		case PART: {
+			HandlePart(client, iss);
+			break;
+		}
+		case LIST: {
+			HandleList(client);
+			break;
+		}
+		case MODE: {
+			HandleMode(client, iss);
+			break;
+		}
+		case UNKNOWN: {
+			if (this->_channels.size() != 0)
+			{
+				std::cout << "coucou toi\n";
+				if (client->GetNickname() == "")
+					this->_channels.at(0)->sendMessage(this->_channels.at(0)->getName() + " " + client->GetUsername() + " : " + command + "\n");
+				else
+					this->_channels.at(0)->sendMessage(this->_channels.at(0)->getName() + " " + client->GetNickname() + " : " + command + "\n");
+			}
+			else
+				std::cout << "Unknown command: " << command << std::endl;
+			break;
+		}
+	}
+}
+
+void Server::Close()
+{
+	if (_serverSd != -1)
+	{
+		if (_clients.size() > 0)
+		{
+			std::cout << "tu passe pas la\n";
+			std::map<int, Client*>::iterator it = _clients.begin();
+			for (;it != _clients.end();)
+				DisconnectClient(it->second, _clients);
+		}
+		std::cout << std::endl << "_clients size : " << _clients.size()<< " content(sockD) : " << std::endl;
+		close(_serverSd);
+		close(_epollFd);
+	}
+}
+
+const std::map<int, Client*>& Server::GetClients() const
+{ 
+	return _clients;
+}
+
+void Server::RemoveChannel(const std::string &channel)
+{
+	int	channel_pos = findChannel(channel);
+
+	if (channel_pos != -1)
+		this->_channels.erase(this->_channels.begin() + channel_pos);
+	else
+		std::cout << "This channel does not exist" << std::endl;
+}
+
+int	Server::findChannel(std::string channel)
+{
+	int	i = 0;
+
+
+	for (std::vector<Channel *>::iterator it = _channels.begin(); it < _channels.end(); it++)
+    {
+        if ((*it)->getName() == channel)
+            return (i);
+		i++;
+	}
+    return (-1);
+}
+
+Channel    *Server::createChannel(std::string name, Client *client)
+{
+	Channel	*channel = new Channel(name, client);
+	return (channel);
+}
+
+Server::~Server()
+{
+	std::map<int, Client*>::iterator it;
+	for (it = _clients.begin(); it != _clients.end(); ++it)
+	{
+		delete it->second;
+	}
+	close(_serverSd);
+}
+
 void Server::BroadcastMessage(const std::string& channel, const std::string& message, Client* sender)
 {
 	std::map<int, Client*>::iterator it;
@@ -289,117 +228,55 @@ void Server::SendPrivateMessage(const std::string& target, const std::string& me
 	}
 }
 
-void Server::PingClients()
+void Server::DisconnectClient(Client* client, std::map<int, Client*>& clients)
 {
-	std::map<int, Client*>::iterator it;
-	for (it = _clients.begin(); it != _clients.end(); it++)
-	{
-		Client* client = it->second;
-		if (client->IsConnected())
-		{
-			time_t currentTime = time(NULL);
-			if (currentTime - client->GetLastActive() > 60)
-			{
-				std::string pingCommand = "PING\r\n";
-				client->SendData(pingCommand);
-				client->UpdateLastActive();
-			}
-		}
-	}
-}
-
-void Server::DisconnectClient(std::map<int, Client*>::iterator& it, Client* client, std::map<int, Client*>& clients)
-{
-	if (client->IsConnected())
-	{
+	// if (client->IsConnected())
+	// {
 		if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
 			std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
 		std::cout << "Client disconnected: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
 		client->Close();
-		delete client;
-		clients.erase(it++);
-	}
+		clients.erase(client->GetSocketDescriptor());
+		// delete client;
+	// }
 }
 
-void Server::HandleAuthentification(Client* client, const std::string& command, std::istringstream& iss)
+bool Server::HandleAuthentification(Client* client, const std::string& command, std::istringstream& iss)
 {
+	if (command != "PASS" && !client->IsAuthenticated())
+	{
+		DisconnectClient(client, _clients);
+		return false;
+	}
 	switch (ParseCommand(command))
 	{
 		case PASS:
 		{
-			std::string password;
-			iss >> password;
-			std::cout << "PASS called\n";
-			if (password == _serverPasswd && !client->IsAuthenticated())
-			{
-			 	client->SetAuthenticated(true);
-				client->SendData("u find the pass\n");
-			}
-			else if (client->IsAuthenticated())
-			{
-				client->SendData("Error you may not reregister\n");
-				return ;
-			}
-			else if (password == "USER" || password == "")
-			{
-				client->SendData("Error PASS not enough parameters\n");
-				if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
-					std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
-				client->Close();
-				_clients.erase(client->GetSocketDescriptor());
-				return ;
-			}
-			else
-			{
-				std::cout << "Client not authenticated: " << inet_ntoa(client->GetAddress().sin_addr) << " sock: " << client->GetSocketDescriptor() << std::endl;
-				if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
-					std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
-				client->Close();
-				_clients.erase(client->GetSocketDescriptor());
-				return;
-			}
+			HandlePass(client, iss);
 			break;
 		}
 		case USER:
 		{
-			if (client->IsAuthenticated())
-			{
-				std::string username, host, server, realname;
-				iss >> username >> host >> server;
-
-				std::getline(iss, realname);
-				if (!realname.empty() && realname[0] == ':')
-					realname.erase(0, 1);
-				client->SetUsername(username);
-				client->SetHost(host);
-				client->SetServer(server);
-				client->SetRealname(realname);
-				client->SendData("good username\n");
-				std::cout << "USER called\n";
-				std::cout << "Client set username: " << username << std::endl;
-				break;
-			}
-			else
-			{
-				std::cout << "Client not authenticated: " << inet_ntoa(client->GetAddress().sin_addr) << " sock: " << client->GetSocketDescriptor() << std::endl;
-				if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
-					std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
-				client->Close();
-				_clients.erase(client->GetSocketDescriptor());
-				return;
-			}
+			HandleUser(client, iss);
+			break;
 		}
-			default : 
+		case NICK:
 		{
-			std::cout << "Client not authenticated: " << inet_ntoa(client->GetAddress().sin_addr) << " sock: " << client->GetSocketDescriptor() << std::endl;
-			if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
-				std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
-			client->Close();
-			_clients.erase(client->GetSocketDescriptor());
-			return;
-		break;
+			HandleNick(client, iss);
+			break;
 		}
+		// default : 
+		// {
+		// 	std::cout << "Client not authenticated: " << inet_ntoa(client->GetAddress().sin_addr) << " sock: " << client->GetSocketDescriptor() << std::endl;
+		// 	if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
+		// 		std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
+		// 	client->Close();
+		// 	_clients.erase(client->GetSocketDescriptor());
+		// 	return;
+		// break;
+		// }
 	}
+	return true;
 }
 
 void Server::Run()
@@ -410,12 +287,11 @@ void Server::Run()
 	struct sockaddr_in clientAddr;
 	socklen_t clientAddrSize = sizeof(clientAddr);
 	time_t timeout = 301;
-	
 
 	std::cout << "Server started on " << _port << " port .." << std::endl;
-
-	while (true)
+	while (quitStatus != true)
 	{
+		std::signal(SIGINT, shandleSigint);
 		int nfds = epoll_wait(_epollFd, events, MAX_EVENTS, 500);
 		if (nfds == -1)
 		{
@@ -449,38 +325,40 @@ void Server::Run()
 				std::map<int, Client*>::iterator it;
 				for (it = _clients.begin(); it != _clients.end();)
 				{
-					Client* client = it->second;
-					int bytesRead = client->ReceiveData();
-
-					if (bytesRead == 0) // Client disconnected
-						DisconnectClient(it, client, _clients);
-					else if (bytesRead > 0)
+					if (!_clients.empty())
 					{
-						std::string receivedData = client->GetReceivedData();
-						std::istringstream iss(receivedData);
-						std::string command;
-						std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
-						while (iss >> command)
+						Client* client = it->second;
+						int bytesRead = client->ReceiveData();
+
+						if (bytesRead == 0) // Client disconnected
+							DisconnectClient(client, _clients);
+						else if (bytesRead > 0)
 						{
-							if (_clients.size() > 0)
+							std::string receivedData = client->GetReceivedData();
+							std::istringstream iss(receivedData);
+							std::string command;
+							std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
+							while (iss >> command)
 							{
-								if (client->IsAuthenticated() && client->GetUsername() != "")
+								if (_clients.size() > 0)
 								{
-									HandleCommand(client, command, iss);
-									++it;
-								}
-								else
-								{
-									std::cout << "tu passe ici debile\n";
-									HandleAuthentification(client, command, iss);
+									if (client->IsAuthenticated() && !client->GetNickname().empty())
+									{
+										HandleCommand(client, command, iss);
+										++it;
+									}
+									else
+										if (!HandleAuthentification(client, command, iss)) break;
 								}
 							}
 						}
+						else
+							++it;
 					}
 					else
-						++it;
+						break;
 				}
-				PingClients();
+				// PingClients();
 				time_t currentTime = time(NULL);
 				for (it = _clients.begin(); it != _clients.end();)
 				{

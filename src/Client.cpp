@@ -1,5 +1,5 @@
 #include "Client.hpp"
-#include "Server.hpp"
+#include "Server/Server.hpp"
 
 
 Client::Client(int socketDescriptor, struct sockaddr_in address, Server* server)
@@ -173,10 +173,7 @@ int Client::GetSocketDescriptor() const
 void Client::Close()
 {
 	if (_socketDescriptor != -1)
-	{
 		close(_socketDescriptor);
-		_socketDescriptor = -1;
-	}
 }
 
 void Client::SetAuthenticated(bool b)
