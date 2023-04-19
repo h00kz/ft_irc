@@ -85,6 +85,7 @@ class Server
 
 		//Nick
 		void    HandleNick(Client *client, std::istringstream &iss);
+		bool    isAvailableNickname(std::string nickname);
 
 		//Part
 		void    HandlePart(Client *client, std::istringstream &iss);
