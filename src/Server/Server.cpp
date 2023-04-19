@@ -129,15 +129,6 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 			break;
 		}
 		case UNKNOWN: {
-			if (this->_channels.size() != 0)
-			{
-				std::cout << "coucou toi\n";
-				if (client->GetNickname() == "")
-					this->_channels.at(0)->sendMessage(this->_channels.at(0)->getName() + " " + client->GetUsername() + " : " + command + "\n");
-				else
-					this->_channels.at(0)->sendMessage(this->_channels.at(0)->getName() + " " + client->GetNickname() + " : " + command + "\n");
-			}
-			else
 				std::cout << "Unknown command: " << command << std::endl;
 			break;
 		}
@@ -148,13 +139,12 @@ void Server::Close()
 {
 	if (_serverSd != -1)
 	{
-		if (_clients.size() > 0)
+		std::map<int, Client*>::iterator it = _clients.begin();
+		for (;it != _clients.end();)
 		{
-			std::map<int, Client*>::iterator it = _clients.begin();
-			for (;it != _clients.end();)
-				DisconnectClient(it->second, _clients);
+			if (DisconnectClient(it->second, _clients))
+				it = _clients.begin();
 		}
-		std::cout << std::endl << "_clients size : " << _clients.size()<< " content(sockD) : " << std::endl;
 		close(_serverSd);
 		close(_epollFd);
 	}
@@ -227,17 +217,15 @@ void Server::SendPrivateMessage(const std::string& target, const std::string& me
 	}
 }
 
-void Server::DisconnectClient(Client* client, std::map<int, Client*>& clients)
+bool Server::DisconnectClient(Client* client, std::map<int, Client*>& clients)
 {
-	// if (client->IsConnected())
-	// {
-		if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
-			std::cerr << "Epoll_ctl DISCO: " << strerror(errno) << std::endl;
-		std::cout << "Client disconnected: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
-		client->Close();
-		clients.erase(client->GetSocketDescriptor());
-		// delete client;
-	// }
+	if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
+		std::cerr << "Epoll_ctl DISCO: " << strerror(errno) << std::endl;
+	std::cout << "Client disconnected: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
+	client->Close();
+	clients.erase(client->GetSocketDescriptor());
+	delete client;
+	return true;
 }
 
 bool Server::HandleAuthentification(Client* client, const std::string& command, std::istringstream& iss)
@@ -330,8 +318,8 @@ void Server::Run()
 						int bytesRead = client->ReceiveData();
 						if (bytesRead == 0) // Client disconnected
 						{
-							DisconnectClient(client, _clients);
-							it = _clients.begin();
+							if (DisconnectClient(client, _clients))
+								it = _clients.begin();
 						}
 						else if (bytesRead > 0)
 						{
