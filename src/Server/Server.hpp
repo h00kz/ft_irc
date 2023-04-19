@@ -18,6 +18,8 @@
 #include <cerrno>
 #include <csignal>
 
+extern bool quitStatus;
+
 enum Command {
 	NICK,
 	USER,
@@ -52,9 +54,9 @@ class Server
 
 	private:
 		/*			Pv_FUNCTIONS		 */
-		void		DisconnectClient(std::map<int, Client*>::iterator& it, Client* client, std::map<int, Client*>& clients);
+		void		DisconnectClient(Client* client, std::map<int, Client*>& clients);
 		void 		HandleCommand(Client* client, const std::string& command, std::istringstream& iss);
-		void		HandleAuthentification(Client* client, const std::string& command, std::istringstream& iss);		
+		bool		HandleAuthentification(Client* client, const std::string& command, std::istringstream& iss);		
 		int			findChannel(std::string channel);
 		void		JoinChannel(Client *client, std::string channel);
 		Channel		*createChannel(std::string name, Client *client);
@@ -103,7 +105,6 @@ class Server
 		int						_serverSd;
 		int						_port;
 		int						_epollFd;
-
 };
 
 #endif

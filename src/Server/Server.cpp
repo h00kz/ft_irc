@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:57 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/18 14:11:08 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/04/18 17:50:53 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,7 +152,7 @@ void Server::Close()
 	{
 		std::map<int, Client*>::iterator it = _clients.begin();
 		for (;it != _clients.end();)
-			DisconnectClient(it, it->second, _clients);
+			DisconnectClient(it->second, _clients);
 		std::cout << std::endl << "_clients size : " << _clients.size()<< " content(sockD) : " << std::endl;
 		close(_serverSd);
 		close(_epollFd);
@@ -227,7 +227,7 @@ void Server::SendPrivateMessage(const std::string& target, const std::string& me
 	}
 }
 
-void Server::DisconnectClient(std::map<int, Client*>::iterator& it, Client* client, std::map<int, Client*>& clients)
+void Server::DisconnectClient(Client* client, std::map<int, Client*>& clients)
 {
 	if (client->IsConnected())
 	{
@@ -235,13 +235,18 @@ void Server::DisconnectClient(std::map<int, Client*>::iterator& it, Client* clie
 			std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
 		std::cout << "Client disconnected: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
 		client->Close();
+		clients.erase(client->GetSocketDescriptor());
 		delete client;
-		clients.erase(it++);
 	}
 }
 
-void Server::HandleAuthentification(Client* client, const std::string& command, std::istringstream& iss)
+bool Server::HandleAuthentification(Client* client, const std::string& command, std::istringstream& iss)
 {
+	if (command != "PASS" && !client->IsAuthenticated())
+	{
+		DisconnectClient(client, _clients);
+		return false;
+	}
 	switch (ParseCommand(command))
 	{
 		case PASS:
@@ -254,17 +259,13 @@ void Server::HandleAuthentification(Client* client, const std::string& command, 
 			HandleUser(client, iss);
 			break;
 		}
-			default : 
+		case NICK:
 		{
-			std::cout << "Client not authenticated: " << inet_ntoa(client->GetAddress().sin_addr) << " sock: " << client->GetSocketDescriptor() << std::endl;
-			if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
-				std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
-			client->Close();
-			_clients.erase(client->GetSocketDescriptor());
-			return;
-		break;
+			HandleNick(client, iss);
+			break;
 		}
 	}
+	return true;
 }
 
 void Server::Run()
@@ -275,11 +276,9 @@ void Server::Run()
 	struct sockaddr_in clientAddr;
 	socklen_t clientAddrSize = sizeof(clientAddr);
 	time_t timeout = 301;
-	
 
 	std::cout << "Server started on " << _port << " port .." << std::endl;
-
-	while (true)
+	while (quitStatus != true)
 	{
 		int nfds = epoll_wait(_epollFd, events, MAX_EVENTS, 500);
 		if (nfds == -1)
@@ -318,7 +317,7 @@ void Server::Run()
 					int bytesRead = client->ReceiveData();
 
 					if (bytesRead == 0) // Client disconnected
-						DisconnectClient(it, client, _clients);
+						DisconnectClient(client, _clients);
 					else if (bytesRead > 0)
 					{
 						std::string receivedData = client->GetReceivedData();
@@ -329,16 +328,14 @@ void Server::Run()
 						{
 							if (_clients.size() > 0)
 							{
-								if (client->IsAuthenticated() && client->GetUsername() != "")
+								if (client->IsAuthenticated() && !client->GetNickname().empty())
 								{
 									HandleCommand(client, command, iss);
 									++it;
 								}
 								else
-								{
-									std::cout << "tu passe ici debile\n";
-									HandleAuthentification(client, command, iss);
-								}
+									if (!HandleAuthentification(client, command, iss)) 
+										break;
 							}
 						}
 					}
