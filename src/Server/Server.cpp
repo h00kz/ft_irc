@@ -77,7 +77,7 @@ Command ParseCommand(const std::string& commandStr)
 		return PRIVMSG;
 	} else if (commandStr == "LIST") {
 		return LIST;
-	}else if (commandStr == "MODE") {
+	} else if (commandStr == "MODE") {
 		return MODE;
 	} else {
 		return UNKNOWN;
@@ -89,11 +89,10 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 	switch (ParseCommand(command))
 	{
 		case PASS: {
-			client->SendData("You should not reregister\n");
+			HandlePass(client, iss);
 			break;
 		}
 		case NICK: {
-			client->SendData("Nickname already set\n");
 			HandleNick(client, iss);
 			break;
 		}
@@ -143,6 +142,44 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 			break;
 		}
 	}
+}
+
+bool Server::HandleAuthentification(Client* client, const std::string& command, std::istringstream& iss)
+{
+	if (command != "PASS" && client->IsAuthenticated() == false)
+	{
+		DisconnectClient(client, _clients);
+		return false;
+	}
+	switch (ParseCommand(command))
+	{
+		case PASS:
+		{
+			HandlePass(client, iss);
+			break;
+		}
+		case NICK:
+		{
+			HandleNick(client, iss);
+			break;
+		}
+		case USER:
+		{
+			HandleUser(client, iss);
+			break;
+		}
+		default :
+		{
+			iss.clear();
+			iss.str("");
+			client->SendData("You're not fully authenticated :\n");
+			if (client->GetNickname() == "")
+				client->SendData("Nickname must be set\n");
+			if (client->GetUsername() == "")
+				client->SendData("Username must be set\n");
+		}
+	}
+	return true;
 }
 
 void Server::Close()
@@ -242,44 +279,6 @@ void Server::DisconnectClient(Client* client, std::map<int, Client*>& clients)
 	// }
 }
 
-bool Server::HandleAuthentification(Client* client, const std::string& command, std::istringstream& iss)
-{
-	if (command != "PASS" && !client->IsAuthenticated())
-	{
-		DisconnectClient(client, _clients);
-		return false;
-	}
-	switch (ParseCommand(command))
-	{
-		case PASS:
-		{
-			HandlePass(client, iss);
-			break;
-		}
-		case USER:
-		{
-			HandleUser(client, iss);
-			break;
-		}
-		case NICK:
-		{
-			HandleNick(client, iss);
-			break;
-		}
-		// default : 
-		// {
-		// 	std::cout << "Client not authenticated: " << inet_ntoa(client->GetAddress().sin_addr) << " sock: " << client->GetSocketDescriptor() << std::endl;
-		// 	if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
-		// 		std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
-		// 	client->Close();
-		// 	_clients.erase(client->GetSocketDescriptor());
-		// 	return;
-		// break;
-		// }
-	}
-	return true;
-}
-
 void Server::Run()
 {
 	int clientSd;
@@ -343,7 +342,7 @@ void Server::Run()
 							{
 								if (_clients.size() > 0)
 								{
-									if (client->IsAuthenticated() && !client->GetNickname().empty())
+									if (client->IsAuthenticated() && !client->GetNickname().empty() && !client->GetUsername().empty())
 									{
 										HandleCommand(client, command, iss);
 										++it;
