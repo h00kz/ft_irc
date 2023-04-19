@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Server.cpp                                         :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/04/18 13:31:57 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/19 11:49:43 by jlarrieu         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "Server.hpp"
 
 static volatile bool quitStatus = false;
@@ -273,6 +261,11 @@ bool Server::HandleAuthentification(Client* client, const std::string& command, 
 			HandleUser(client, iss);
 			break;
 		}
+		case NICK:
+		{
+			HandleNick(client, iss);
+			break;
+		}
 		// default : 
 		// {
 		// 	std::cout << "Client not authenticated: " << inet_ntoa(client->GetAddress().sin_addr) << " sock: " << client->GetSocketDescriptor() << std::endl;
@@ -295,10 +288,8 @@ void Server::Run()
 	struct sockaddr_in clientAddr;
 	socklen_t clientAddrSize = sizeof(clientAddr);
 	time_t timeout = 301;
-	
 
 	std::cout << "Server started on " << _port << " port .." << std::endl;
-
 	while (quitStatus != true)
 	{
 		std::signal(SIGINT, shandleSigint);
@@ -335,35 +326,40 @@ void Server::Run()
 				std::map<int, Client*>::iterator it;
 				for (it = _clients.begin(); it != _clients.end();)
 				{
-					Client* client = it->second;
-					int bytesRead = client->ReceiveData();
-
-					if (bytesRead == 0) // Client disconnected
-						DisconnectClient(client, _clients);
-					else if (bytesRead > 0)
+					if (!_clients.empty())
 					{
-						std::string receivedData = client->GetReceivedData();
-						std::istringstream iss(receivedData);
-						std::string command;
-						std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
-						while (iss >> command)
+						Client* client = it->second;
+						int bytesRead = client->ReceiveData();
+
+						if (bytesRead == 0) // Client disconnected
+							DisconnectClient(client, _clients);
+						else if (bytesRead > 0)
 						{
-							if (_clients.size() > 0)
+							std::string receivedData = client->GetReceivedData();
+							std::istringstream iss(receivedData);
+							std::string command;
+							std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
+							while (iss >> command)
 							{
-								if (client->IsAuthenticated() && client->GetUsername() != "")
+								if (_clients.size() > 0)
 								{
-									HandleCommand(client, command, iss);
-									++it;
+									if (client->IsAuthenticated() && !client->GetNickname().empty())
+									{
+										HandleCommand(client, command, iss);
+										++it;
+									}
+									else
+										if (!HandleAuthentification(client, command, iss)) break;
 								}
-								else
-									if (!HandleAuthentification(client, command, iss)) break;
 							}
 						}
+						else
+							++it;
 					}
 					else
-						++it;
+						break;
 				}
-				PingClients();
+				// PingClients();
 				time_t currentTime = time(NULL);
 				for (it = _clients.begin(); it != _clients.end();)
 				{
