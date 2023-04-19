@@ -18,7 +18,7 @@
 #include <cerrno>
 #include <csignal>
 
-extern bool quitStatus;
+extern Server* g_server;
 
 enum Command {
 	NICK,
