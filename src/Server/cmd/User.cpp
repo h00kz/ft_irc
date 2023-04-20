@@ -6,7 +6,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:29 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/19 16:37:25 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/04/19 17:07:02 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,18 @@ void    Server::HandleUser(Client *client, std::istringstream &iss)
         std::string username, host, server, realname;
 
     
-        iss >> username >> host >> server;
+        iss >> username >> host >> server >> realname;
         std::cout << "USER called\n";
-        std::getline(iss, realname);
+        //std::getline(iss, realname);
         if (realname.empty() == true)
-            client->SendData("USER :Not enough parameters");
+            client->SendData("USER :Not enough parameters\n");
         else if (realname[0] != ':')
+        {
+            std::cout << realname << std::endl;
             client->SendData("USER :realname must be prefixed with \":\"\n");
+        }
+        else if (client->GetUsername().empty() == false)
+            client->SendData("You may not reregister\n");
         else
         {
             realname.erase(0, 1);

@@ -1,5 +1,5 @@
 #include "Server.hpp"
-
+#include "../utils.h"
 static volatile bool quitStatus = false;
 
 void shandleSigint(int signal)
@@ -161,8 +161,6 @@ bool Server::HandleAuthentification(Client* client, const std::string& command, 
 		}
 		default :
 		{
-			iss.clear();
-			iss.str("");
 			client->SendData("You're not fully authenticated :\n");
 			if (client->GetNickname() == "")
 				client->SendData("Nickname must be set\n");
@@ -170,6 +168,7 @@ bool Server::HandleAuthentification(Client* client, const std::string& command, 
 				client->SendData("Username must be set\n");
 		}
 	}
+	while(iss.get() != '\n');
 	return true;
 }
 
@@ -177,14 +176,12 @@ void Server::Close()
 {
 	if (_serverSd != -1)
 	{
-		if (_clients.size() > 0)
+		std::map<int, Client*>::iterator it = _clients.begin();
+		for (;it != _clients.end();)
 		{
-			std::cout << "tu passe pas la\n";
-			std::map<int, Client*>::iterator it = _clients.begin();
-			for (;it != _clients.end();)
-				DisconnectClient(it->second, _clients);
+			if (DisconnectClient(it->second, _clients))
+				it = _clients.begin();
 		}
-		std::cout << std::endl << "_clients size : " << _clients.size()<< " content(sockD) : " << std::endl;
 		close(_serverSd);
 		close(_epollFd);
 	}
@@ -260,13 +257,15 @@ void Server::SendPrivateMessage(const std::string& target, const std::string& me
 */
 }
 
-void Server::DisconnectClient(Client* client, std::map<int, Client*>& clients)
+bool Server::DisconnectClient(Client* client, std::map<int, Client*>& clients)
 {
 	if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
-		std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
+  std::cerr << "Epoll_ctl DISCO: " << strerror(errno) << std::endl;
 	std::cout << "Client disconnected: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
 	client->Close();
 	clients.erase(client->GetSocketDescriptor());
+	delete client;
+	return true;
 }
 
 void Server::Run()
@@ -319,9 +318,11 @@ void Server::Run()
 					{
 						Client* client = it->second;
 						int bytesRead = client->ReceiveData();
-
 						if (bytesRead == 0) // Client disconnected
-							DisconnectClient(client, _clients);
+						{
+							if (DisconnectClient(client, _clients))
+								it = _clients.begin();
+						}
 						else if (bytesRead > 0)
 						{
 							std::string receivedData = client->GetReceivedData();
