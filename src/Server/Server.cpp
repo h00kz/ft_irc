@@ -129,15 +129,6 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 			break;
 		}
 		case UNKNOWN: {
-			if (this->_channels.size() != 0)
-			{
-				std::cout << "coucou toi\n";
-				if (client->GetNickname() == "")
-					this->_channels.at(0)->sendMessage(this->_channels.at(0)->getName() + " " + client->GetUsername() + " : " + command + "\n");
-				else
-					this->_channels.at(0)->sendMessage(this->_channels.at(0)->getName() + " " + client->GetNickname() + " : " + command + "\n");
-			}
-			else
 				std::cout << "Unknown command: " << command << std::endl;
 			break;
 		}
@@ -199,53 +190,53 @@ void Server::Close()
 	}
 }
 
-const std::map<int, Client*>& Server::GetClients() const
-{ 
-	return _clients;
-}
-
-void Server::RemoveChannel(const std::string &channel)
-{
-	int	channel_pos = findChannel(channel);
-
-	if (channel_pos != -1)
-		this->_channels.erase(this->_channels.begin() + channel_pos);
-	else
-		std::cout << "This channel does not exist" << std::endl;
-}
-
-int	Server::findChannel(std::string channel)
-{
-	int	i = 0;
-
-
-	for (std::vector<Channel *>::iterator it = _channels.begin(); it < _channels.end(); it++)
-    {
-        if ((*it)->getName() == channel)
-            return (i);
-		i++;
-	}
-    return (-1);
-}
-
-Channel    *Server::createChannel(std::string name, Client *client)
-{
-	Channel	*channel = new Channel(name, client);
-	return (channel);
-}
-
 Server::~Server()
 {
+/*
 	std::map<int, Client*>::iterator it;
 	for (it = _clients.begin(); it != _clients.end(); ++it)
 	{
 		delete it->second;
 	}
 	close(_serverSd);
+*/
+}
+
+Client	*Server::findClient(const std::string &name)
+{
+    for (std::map<int, Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+    {
+        Client* client = it->second;
+        if (client->GetNickname() == name)
+            return (client);
+    }
+    return (NULL);
+}
+
+Channel	*Server::findChannel(const std::string &name)
+{
+    
+    std::map<std::string, Channel *>::iterator it = _channels.find(name);
+    if (it != _channels.end())
+        return (it->second);
+    return (NULL);
+}
+
+void Server::RemoveChannel(const std::string &name)
+{
+	Channel *channel;
+
+	channel = findChannel(name);
+	if (channel != NULL)
+	{
+		delete (channel);
+		this->_channels.erase(name);
+	}
 }
 
 void Server::BroadcastMessage(const std::string& channel, const std::string& message, Client* sender)
 {
+	/*
 	std::map<int, Client*>::iterator it;
 	for (it = _clients.begin(); it != _clients.end(); ++it)
 	{
@@ -253,10 +244,12 @@ void Server::BroadcastMessage(const std::string& channel, const std::string& mes
 		if (client != sender && client->IsInChannel(channel))
 			client->SendData(message);
 	}
+	*/
 }
 
 void Server::SendPrivateMessage(const std::string& target, const std::string& message, Client* sender)
 {
+/*
 	std::map<int, Client*>::iterator it;
 	for (it = _clients.begin(); it != _clients.end(); ++it)
 	{
@@ -264,19 +257,16 @@ void Server::SendPrivateMessage(const std::string& target, const std::string& me
 		if (client != sender && client->GetNickname() == target) 
 			client->SendData(message);
 	}
+*/
 }
 
 void Server::DisconnectClient(Client* client, std::map<int, Client*>& clients)
 {
-	// if (client->IsConnected())
-	// {
-		if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
-			std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
-		std::cout << "Client disconnected: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
-		client->Close();
-		clients.erase(client->GetSocketDescriptor());
-		// delete client;
-	// }
+	if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
+		std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
+	std::cout << "Client disconnected: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
+	client->Close();
+	clients.erase(client->GetSocketDescriptor());
 }
 
 void Server::Run()
@@ -375,4 +365,10 @@ void Server::Run()
 			}
 		}
 	}
+}
+
+//Getters
+const std::map<int, Client*>& Server::GetClients() const
+{ 
+	return _clients;
 }
