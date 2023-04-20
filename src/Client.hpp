@@ -1,17 +1,18 @@
 #ifndef CLIENT_HPP
-#define CLIENT_HPP
+# define CLIENT_HPP
 
-#include <string>
-#include <vector>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <ctime>
-#include <unistd.h>
-#include <cstring>
-#include <iostream>
-#include <algorithm>
+# include <string>
+# include <sys/socket.h>
+# include <arpa/inet.h>
+# include <ctime>
+# include <unistd.h>
+# include <cstring>
+# include <iostream>
+# include <algorithm>
+# include <map>
 
 class Server;
+class Channel;
 
 class Client
 {
@@ -32,18 +33,19 @@ class Client
 		void SetServer(const std::string &username);
 		std::string const &GetServer() const;
 		
-		const std::vector<std::string> &GetChannels() const;
-		
 		int GetSocketDescriptor() const;
 
 		void JoinChannel(const std::string &channel);
 		void LeaveChannel(const std::string &channel);
+		Channel	*findChannel(std::map<std::string, Channel *> &channels, const std::string &name);
+
 		const std::string &GetReceivedData() const;
 		int ReceiveData();
 		time_t GetLastActive() const;
 		void UpdateLastActive();
 
-		bool IsInChannel(const std::string& channel) const;
+		void	enterChannel(const std::string& name, Channel *channel);
+//		bool IsInChannel(const std::string& channel) const;
 		bool IsConnected() const;
 		void Close();
 
@@ -52,6 +54,9 @@ class Client
 
 		void SetAuthenticated(bool b);
 		bool IsAuthenticated();
+
+		const std::map<std::string, Channel*> GetChannels() const;
+
 		
 	private:
 	
@@ -67,8 +72,8 @@ class Client
 		std::string _hostName;
 		std::string _serverName;
 		std::string _username;
-		std::vector<std::string> _channels;
+		std::map<std::string, Channel*>	_channels;
 		time_t _lastActive;
 };
 
-#endif
+#endif //CLIENT_HPP

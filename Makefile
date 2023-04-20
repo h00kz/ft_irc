@@ -6,27 +6,29 @@
 #    By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/28 16:38:05 by jlarrieu          #+#    #+#              #
-#    Updated: 2023/04/19 14:35:21 by ffeaugas         ###   ########.fr        #
+#    Updated: 2023/04/20 11:46:43 by ffeaugas         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC		=	c++
 CFLAGS	=	-g #-Wall -Wextra -Werror -std=c++98
 
-SRCS	=	src/main.cpp				\
-			src/utils.cpp				\
-			src/Client.cpp				\
-			src/Channel.cpp				\
-			src/Server/Server.cpp		\
-			src/Server/cmd/Join.cpp		\
-			src/Server/cmd/List.cpp		\
-			src/Server/cmd/Mode.cpp		\
-			src/Server/cmd/Nick.cpp		\
-			src/Server/cmd/Part.cpp		\
-			src/Server/cmd/Pass.cpp		\
-			src/Server/cmd/Ping.cpp		\
-			src/Server/cmd/Pong.cpp		\
-			src/Server/cmd/PrivMsg.cpp	\
+SRCS	=	src/main.cpp					\
+			src/utils.cpp					\
+			src/utils_channel.cpp			\
+			src/utils_client.cpp			\
+			src/Client.cpp					\
+			src/Channel.cpp					\
+			src/Server/Server.cpp			\
+			src/Server/cmd/Join.cpp			\
+			src/Server/cmd/List.cpp			\
+			src/Server/cmd/Mode.cpp			\
+			src/Server/cmd/Nick.cpp			\
+			src/Server/cmd/Part.cpp			\
+			src/Server/cmd/Pass.cpp			\
+			src/Server/cmd/Ping.cpp			\
+			src/Server/cmd/Pong.cpp			\
+			src/Server/cmd/PrivMsg.cpp		\
 			src/Server/cmd/User.cpp		
 
 OBJ			= $(SRCS:.cpp=.o)

@@ -1,22 +1,16 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   utils.h                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/04/19 14:05:47 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/19 17:58:08 by ffeaugas         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef UTILS_H
 # define UTILS_H
 
+# include <map>
 # include <iostream>
 # include <string>
 # include <sstream>
 
 int getNbWords(std::string str);
+
+//utils_channel
+//int     findChannelPos(std::map<std::string, Channel*> &channels , const std::string &name);
+
+//utils_clients
 
 #endif //UTILS_H

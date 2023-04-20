@@ -44,7 +44,9 @@ class Server
 
 		/*			ACCESSORS			 */
 		std::map<int, Client*> const&	GetClients() const;
-	
+		Client		*findClient(const std::string &name);
+		Channel		*findChannel(const std::string &name);
+
 		/*			Pb_FUNCTIONS		 */
 		void		Run();
 		void		BroadcastMessage(const std::string& channel, const std::string& message, Client* sender);
@@ -57,10 +59,6 @@ class Server
 		bool		DisconnectClient(Client* client, std::map<int, Client*>& clients);
 		void 		HandleCommand(Client* client, const std::string& command, std::istringstream& iss);
 		bool		HandleAuthentification(Client* client, const std::string& command, std::istringstream& iss);		
-		int			findChannel(std::string channel);
-		void		JoinChannel(Client *client, std::string channel);
-		Channel		*createChannel(std::string name, Client *client);
-
 
 		//-----------CMD-----------------
 
@@ -99,7 +97,7 @@ class Server
 
 
 		std::map<int, Client*>	_clients; // k: op_id, v: client
-		std::vector<Channel*>	_channels;
+		std::map<std::string, Channel*>	_channels;
 		sockaddr_in				_servAddr;
 		std::string const		_serverPasswd;
 		std::string const		_serverName;
