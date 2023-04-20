@@ -17,11 +17,11 @@ Client::~Client()
 	Close();
 }
 
-Channel	*Client::findChannel(std::map<std::string, Channel *> &channels, const std::string &name)
+Channel	*Client::findChannel(const std::string &name)
 {
     
-    std::map<std::string, Channel *>::iterator it = channels.find(name);
-    if (it != channels.end())
+    std::map<std::string, Channel *>::iterator it = _channels.find(name);
+    if (it != _channels.end())
         return (it->second);
     return (NULL);
 }
@@ -65,6 +65,13 @@ int Client::ReceiveData()
 void	Client::enterChannel(const std::string& name, Channel *channel)
 {
 	_channels[name] = channel;
+	for (std::map<std::string, Channel*>::iterator it = _channels.begin();it != _channels.end();++it)
+		std::cout << it->first.c_str() << std::endl;
+}
+
+bool Client::IsInChannel(const std::string &channel) const
+{
+	return _channels.find(channel) != _channels.end();
 }
 
 /*
@@ -80,32 +87,18 @@ void Client::JoinChannel(const std::string &channel)
 
 void Client::LeaveChannel(const std::string &channel)
 {
-/*
-	bool channelIsEmpty = true;
-	if (!this->IsInChannel(channel))
-		return;
-	_channels.erase(std::remove(_channels.begin(), _channels.end(), channel), _channels.end());
-	std::map<int, Client*>::const_iterator it;
-	for (it = _server->GetClients().begin(); it != _server->GetClients().end(); ++it)
-	{
-		const std::vector<std::string>& otherClientChannels = it->second->GetChannels();
-		if (std::find(otherClientChannels.begin(), otherClientChannels.end(), channel) != otherClientChannels.end())
-		{
-			channelIsEmpty = false;
-			break;
-		}
-	}
-	if (channelIsEmpty)
-	{
-		_server->RemoveChannel(channel);
-	}
-*/
+	
 }
 
 
-const std::map<std::string, Channel*> Client::GetChannels() const
+const std::map<std::string, Channel*>& Client::GetChannels() const
 {
 	return _channels;
+}
+
+void Client::AddChannel(Channel* channel)
+{
+	_channels.insert(std::make_pair(channel->getName(), channel));
 }
 
 const std::string &Client::GetReceivedData() const
@@ -116,18 +109,16 @@ const std::string &Client::GetReceivedData() const
 
 void Client::SendMessage(const std::string& target, const std::string& message)
 {
-	/*
 	if (_server)
 	{
 		std::string formattedMessage = ":" + _nickname + " PRIVMSG " + target + " :" + message + "\r\n";
-		if (target[0] == '#' && this->IsInChannel(target))
+		if (target[0] == '#')
 			_server->BroadcastMessage(target, formattedMessage, this);
 		else if (target[0] != '#')
 			_server->SendPrivateMessage(target, formattedMessage, this);
 		else
 			std::cout << "This channel not exist.\n";
 	}
-	*/
 }
 
 int Client::GetSocketDescriptor() const
@@ -140,13 +131,6 @@ void Client::Close()
 	if (_socketDescriptor != -1)
 		close(_socketDescriptor);
 }
-
-/*
-bool Client::IsInChannel(const std::string& channel) const
-{
-	return std::find(_channels.begin(), _channels.end(), channel) != _channels.end();
-}
-*/
 
 void Client::SendData(const std::string& data)
 {
