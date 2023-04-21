@@ -59,7 +59,7 @@ class Client
 		int GetSocketDescriptor() const;
 		const std::string &GetReceivedData() const;
 		time_t GetLastActive() const;
-		const std::map<std::string, Channel*>& GetChannels() const;
+		std::map<std::string, Channel*>& GetChannels();
 		const struct sockaddr_in &GetAddress() const;
 	
 	private:

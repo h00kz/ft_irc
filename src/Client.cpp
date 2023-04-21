@@ -128,7 +128,7 @@ void Client::SetUsername(std::string const &username) { _username = username; }
 
 //----------------[GETTERS]---------------------------------------------------
 
-const std::map<std::string, Channel*>& Client::GetChannels() const { return _channels; }
+std::map<std::string, Channel*>& Client::GetChannels() { return _channels; }
 
 time_t Client::GetLastActive() const { return _lastActive; }
 
