@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   PrivMsg.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:32 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/20 12:20:36 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/04/20 15:22:29 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
    
 void    Server::HandlePrivMsg(Client *client, std::istringstream &iss)
 {
-/*
     std::string target, message;
     iss >> target;
     getline(iss, message);
@@ -22,5 +21,4 @@ void    Server::HandlePrivMsg(Client *client, std::istringstream &iss)
         message.erase(0, 1);
     client->SendMessage(target, message);
     std::cout << "Client sent message to " << target << ": " << message << std::endl;
-*/
 }

@@ -3,31 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   Join.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:47 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/20 13:38:41 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/04/20 16:03:16 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Server.hpp"
-
-/*
-void	Server::JoinChannel(Client *client, std::string channel)
-{
-	int channel_pos = this->FindChannel(channel);
-	if (channel_pos == -1)
-	{
-		std::cout << channel_pos << std::endl;
-		this->_channels.push_back(createChannel(channel, client));
-	}
-	else
-	{
-		std::cout << "came saoule\n";
-		this->_channels.at(channel_pos)->addClient(client);
-	}
-}
-*/
 
 static bool    isValidChannelName(std::string channel)
 {
@@ -48,20 +31,19 @@ void    Server::HandleJoin(Client *client, std::istringstream &iss)
 	std::cout << "JOIN called\n";
 	if (isValidChannelName(name) == false)
 		client->SendData(name += " :Erroneus name name\n");
-	else if (this->findChannel(name) == NULL)
+	std::map<std::string, Channel*>::iterator it = _channels.find(name);
+	if (it == _channels.end())
 	{
-		Channel *new_channel = new Channel(name, client);
-		if (new_channel == NULL)
-			return (client->SendData("name creation failed\n"));
-		_channels[name] = new_channel;
-		client->enterChannel(name, new_channel);
-		std::cout << "Channel " << name << "successfully created" << std::endl;
+		Channel* newChannel = new Channel(name, client);
+		_channels.insert(std::make_pair(name, newChannel));
+		newChannel->addClient(client);
+		client->AddChannel(newChannel);
+		std::cout << "Channel " << name << " created and client joined." << std::endl;
 	}
-	/*
 	else
 	{
-		this->JoinChannel(client, channel);
-		std::cout << "Client joined channel: " << channel << std::endl;
+		it->second->addClient(client);
+		client->AddChannel(it->second);
+		std::cout << "Client " << client->GetNickname() << " joined  channel " << name << "." << std::endl;
 	}
-	*/
 }

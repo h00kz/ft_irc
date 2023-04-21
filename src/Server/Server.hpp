@@ -46,6 +46,7 @@ class Server
 		std::map<int, Client*> const&	GetClients() const;
 		Client		*findClient(const std::string &name);
 		Channel		*findChannel(const std::string &name);
+		void		JoinChannel(Client* client, const std::string& chanName);
 
 		/*			Pb_FUNCTIONS		 */
 		void		Run();

@@ -20,17 +20,18 @@ void    Channel::setMode(std::string new_mode)
 
 void    Channel::addClient(Client *client)
 {
-/*
-    t_client *new_client = new t_client;
+    t_client *newClient = new t_client;
 
-    new_client->client = client;
-    int client_pos = this->findClient(client);
-    if (client_pos == -1)
-        _clients[client->GetNickname] = new_client;
-        this->_clients.push_back(new_client);
+    newClient->client = client;
+	printf("CLIENT : %p\n", findClient(newClient->client->GetNickname()));
+	if (findClient(newClient->client->GetNickname()) != NULL)
+	{
+    	_clients.insert(std::make_pair(newClient->client->GetSocketDescriptor(), newClient));
+		for (std::map<int, t_client*>::iterator it = _clients.begin();it != _clients.end();++it)
+			std::cout << it->second->client->GetNickname() << std::endl;
+	}
     else
         std::cout << "Client is already in this channel" << std::endl;
-*/
 }
 
 std::string const Channel::getName(void) const

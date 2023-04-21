@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Ping.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:37 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/20 12:10:37 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/04/20 15:26:41 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 
 void Server::PingClients()
 {
-/*
 	std::map<int, Client*>::iterator it;
 	for (it = _clients.begin(); it != _clients.end(); it++)
 	{
@@ -30,15 +29,12 @@ void Server::PingClients()
 			}
 		}
 	}
-*/
 }
 
 void    Server::HandlePing(Client *client)
 {
-/*
     client->UpdateLastActive();
     std::string response = "PONG\r\n";
     client->SendData(response);
     std::cout << "PONG sent to " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
-*/
 }

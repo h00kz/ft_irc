@@ -37,7 +37,7 @@ class Client
 
 		void JoinChannel(const std::string &channel);
 		void LeaveChannel(const std::string &channel);
-		Channel	*findChannel(std::map<std::string, Channel *> &channels, const std::string &name);
+		Channel	*findChannel(const std::string &name);
 
 		const std::string &GetReceivedData() const;
 		int ReceiveData();
@@ -45,7 +45,7 @@ class Client
 		void UpdateLastActive();
 
 		void	enterChannel(const std::string& name, Channel *channel);
-//		bool IsInChannel(const std::string& channel) const;
+		bool IsInChannel(const std::string& channel) const;
 		bool IsConnected() const;
 		void Close();
 
@@ -55,8 +55,8 @@ class Client
 		void SetAuthenticated(bool b);
 		bool IsAuthenticated();
 
-		const std::map<std::string, Channel*> GetChannels() const;
-
+		const std::map<std::string, Channel*>& GetChannels() const;
+		void	AddChannel(Channel* channel);
 		
 	private:
 	

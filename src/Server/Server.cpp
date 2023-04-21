@@ -189,14 +189,12 @@ void Server::Close()
 
 Server::~Server()
 {
-/*
 	std::map<int, Client*>::iterator it;
 	for (it = _clients.begin(); it != _clients.end(); ++it)
 	{
 		delete it->second;
 	}
 	close(_serverSd);
-*/
 }
 
 Client	*Server::findClient(const std::string &name)
@@ -233,7 +231,6 @@ void Server::RemoveChannel(const std::string &name)
 
 void Server::BroadcastMessage(const std::string& channel, const std::string& message, Client* sender)
 {
-	/*
 	std::map<int, Client*>::iterator it;
 	for (it = _clients.begin(); it != _clients.end(); ++it)
 	{
@@ -241,12 +238,10 @@ void Server::BroadcastMessage(const std::string& channel, const std::string& mes
 		if (client != sender && client->IsInChannel(channel))
 			client->SendData(message);
 	}
-	*/
 }
 
 void Server::SendPrivateMessage(const std::string& target, const std::string& message, Client* sender)
 {
-/*
 	std::map<int, Client*>::iterator it;
 	for (it = _clients.begin(); it != _clients.end(); ++it)
 	{
@@ -254,7 +249,6 @@ void Server::SendPrivateMessage(const std::string& target, const std::string& me
 		if (client != sender && client->GetNickname() == target) 
 			client->SendData(message);
 	}
-*/
 }
 
 bool Server::DisconnectClient(Client* client, std::map<int, Client*>& clients)
@@ -349,7 +343,7 @@ void Server::Run()
 					else
 						break;
 				}
-				// PingClients();
+				PingClients();
 				time_t currentTime = time(NULL);
 				for (it = _clients.begin(); it != _clients.end();)
 				{

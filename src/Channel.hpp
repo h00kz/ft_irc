@@ -25,7 +25,6 @@ class Channel
         Channel(std::string name, Client *client);
         // void    setMode(std::string);
 		void    addClient(Client * client);
-        int     findClient(Client *client);
         void    sendMessage(std::string message);
 		Client	*findClient(const std::string &name);
         
