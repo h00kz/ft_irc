@@ -1,6 +1,6 @@
 #include "Channel.hpp"
 
-Channel::Channel(std::string name, Client *client) : _name(name), _topic(""), _key("")
+Channel::Channel(std::string name, Client *client) : _name(name), _topic(""), _key(""), _invite_only(false)
 {
     t_client *newClient = new t_client;
     newClient->client = client;
@@ -47,13 +47,33 @@ Client	*Channel::findClient(const std::string &name)
     return (NULL);
 }
 
+bool    Channel::IsInvited(int socketDescriptor) const
+{
+    for (int i = 0; i < this->_invited_clients.size(); i++)
+    {
+        if (this->_invited_clients[i] == socketDescriptor)
+            return (true);
+    }
+    return (false);
+}
+
+bool    Channel::IsOperator(int socketDescriptor) const
+{
+    t_client    *client;
+
+    client = this->_clients.find(socketDescriptor)->second;
+    if (client != NULL && client->op)
+        return (true); 
+    return (false);
+}
+
 //----------------[SETTERS]---------------------------------------------------
 
-/*
-void    Channel::setMode(std::string new_mode)
+void    Channel::SetInvitation(int socketDescriptor)
 {
-}
-*/
+    if (IsInvited(socketDescriptor) == false)
+        this->_invited_clients.push_back(socketDescriptor);
+};
 
 void    Channel::setKey(std::string key) { this->_key = key; }
 
@@ -65,4 +85,6 @@ std::string const Channel::getName(void) const { return (this->_name); }
 
 std::string    Channel::getTopic(void) const { return (this->_topic); }
 
-int Channel::getNbClients(void) const { return (_clients.size()); }
+int Channel::getNbClients(void) const { return (this->_clients.size()); }
+
+bool    Channel::IsInviteOnly(void) const { return (this->_invite_only); }

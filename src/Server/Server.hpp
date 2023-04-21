@@ -1,23 +1,25 @@
 #ifndef SERVER_HPP
-#define SERVER_HPP
+# define SERVER_HPP
 
-#include "../Channel.hpp"
-#include "../Client.hpp"
-#include <iostream>
-#include <map>
-#include <vector>
-#include <sys/socket.h>
-#include <sys/epoll.h>
-#include <arpa/inet.h>
-#include <cstdlib>
-#include <cstring>
-#include <unistd.h>
-#include <sys/types.h>
-#include <netinet/in.h>
-#include <sstream>
-#include <fcntl.h>
-#include <cerrno>
-#include <csignal>
+# include "../Channel.hpp"
+# include "../Client.hpp"
+# include <iostream>
+# include <map>
+# include <vector>
+# include <sys/socket.h>
+# include <sys/epoll.h>
+# include <arpa/inet.h>
+# include <cstdlib>
+# include <cstring>
+# include <unistd.h>
+# include <sys/types.h>
+# include <netinet/in.h>
+# include <sstream>
+# include <fcntl.h>
+# include <cerrno>
+# include <csignal>
+
+# define CHANNEL_LIMIT 10
 
 extern Server* g_server;
 
@@ -33,7 +35,8 @@ enum Command {
 	UNKNOWN,
 	LIST,
 	MODE,
-	TOPIC
+	TOPIC,
+	INVITE
 };
 
 class Server
@@ -100,6 +103,9 @@ class Server
 
 		//Topic
 		void    HandleTopic(Client *client, std::istringstream &iss);
+
+		//Invite
+		void    HandleInvite(Client *client, std::istringstream &iss);
 
 
 		std::map<int, Client*>	_clients; // k: op_id, v: client
