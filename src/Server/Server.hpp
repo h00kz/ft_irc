@@ -5,6 +5,7 @@
 #include "../Client.hpp"
 #include <iostream>
 #include <map>
+#include <vector>
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <arpa/inet.h>
@@ -31,7 +32,8 @@ enum Command {
 	PRIVMSG,
 	UNKNOWN,
 	LIST,
-	MODE
+	MODE,
+	TOPIC
 };
 
 class Server
@@ -47,6 +49,7 @@ class Server
 		Client		*findClient(const std::string &name);
 		Channel		*findChannel(const std::string &name);
 		void		JoinChannel(Client* client, const std::string& chanName);
+		void		CloseEmptyChannels(void);
 
 		/*			Pb_FUNCTIONS		 */
 		void		Run();
@@ -95,6 +98,8 @@ class Server
 		//Mode
 		void    HandleMode(Client *client, std::istringstream &iss);
 
+		//Topic
+		void    HandleTopic(Client *client, std::istringstream &iss);
 
 
 		std::map<int, Client*>	_clients; // k: op_id, v: client

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Join.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:47 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/20 16:03:16 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/04/21 15:21:16 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,10 +29,14 @@ void    Server::HandleJoin(Client *client, std::istringstream &iss)
 	iss >> name;
 
 	std::cout << "JOIN called\n";
-	if (isValidChannelName(name) == false)
-		client->SendData(name += " :Erroneus name name\n");
 	std::map<std::string, Channel*>::iterator it = _channels.find(name);
-	if (it == _channels.end())
+	if (name.empty()) {
+        client->SendData("JOIN :Need more params\n");
+	}
+	else if (isValidChannelName(name) == false) {
+		client->SendData(name += " :Erroneus name name\n");
+	}
+	else if (it == _channels.end())
 	{
 		Channel* newChannel = new Channel(name, client);
 		_channels.insert(std::make_pair(name, newChannel));
@@ -40,10 +44,15 @@ void    Server::HandleJoin(Client *client, std::istringstream &iss)
 		client->AddChannel(newChannel);
 		std::cout << "Channel " << name << " created and client joined." << std::endl;
 	}
-	else
+	else if (client->IsInChannel(name) == false)
 	{
 		it->second->addClient(client);
 		client->AddChannel(it->second);
 		std::cout << "Client " << client->GetNickname() << " joined  channel " << name << "." << std::endl;
+		HandleTopic(client, iss);
 	}
+	else
+		std::cout << "Client already in " << name << " channel\n";
+	if (name.empty() == false)
+    	while(iss.get() != '\n');
 }

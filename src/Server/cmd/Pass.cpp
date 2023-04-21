@@ -6,7 +6,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:38 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/19 16:28:29 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/04/21 15:21:48 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,12 +16,14 @@
 void    Server::HandlePass(Client *client, std::istringstream &iss)
 {
     std::string password;
+
     iss >> password;
     std::cout << "PASS called\n";
-    if (client->IsAuthenticated() == true)
-        client->SendData("You may not reregister\n");
-    else if (getNbWords(password) == 0)
+    if (password.empty()) {
         client->SendData("PASS :Not enough parameters\n");
+    }
+    else if (client->IsAuthenticated() == true)
+        client->SendData("You may not reregister\n");
     else if (password == _serverPasswd && client->IsAuthenticated() == false)
     {
         client->SetAuthenticated(true);
@@ -32,5 +34,7 @@ void    Server::HandlePass(Client *client, std::istringstream &iss)
         std::cout << "Invalid password, client disconnected" << std::endl;
         DisconnectClient(client, _clients);
     }
+    if (password.empty() == false)
+        while(iss.get() != '\n');
     return;
 }

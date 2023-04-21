@@ -1,6 +1,6 @@
 #include "Channel.hpp"
 
-Channel::Channel(std::string name, Client *client) : _name(name), _topic("")
+Channel::Channel(std::string name, Client *client) : _name(name), _topic(""), _key("")
 {
     t_client *newClient = new t_client;
     newClient->client = client;
@@ -12,11 +12,6 @@ Channel::~Channel()
 {
 }
 
-/*
-void    Channel::setMode(std::string new_mode)
-{
-}
-*/
 
 void    Channel::addClient(Client *client)
 {
@@ -34,9 +29,9 @@ void    Channel::addClient(Client *client)
         std::cout << "Client is already in this channel" << std::endl;
 }
 
-std::string const Channel::getName(void) const
+void    Channel::removeClient(int socketDescriptor)
 {
-    return (this->_name);
+    _clients.erase(socketDescriptor);
 }
 
 Client	*Channel::findClient(const std::string &name)
@@ -49,3 +44,23 @@ Client	*Channel::findClient(const std::string &name)
     }
     return (NULL);
 }
+
+//----------------[SETTERS]---------------------------------------------------
+
+/*
+void    Channel::setMode(std::string new_mode)
+{
+}
+*/
+
+void    Channel::setKey(std::string key) { this->_key = key; }
+
+void    Channel::setTopic(std::string topic) { this->_topic = topic; }
+
+//----------------[GETTERS]---------------------------------------------------
+
+std::string const Channel::getName(void) const { return (this->_name); }
+
+std::string    Channel::getTopic(void) const { return (this->_topic); }
+
+int Channel::getNbClients(void) const { return (_clients.size()); }

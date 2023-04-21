@@ -31,11 +31,6 @@ void Client::UpdateLastActive()
 	_lastActive = time(NULL);
 }
 
-time_t Client::GetLastActive() const
-{
-	return _lastActive;
-}
-
 bool Client::IsConnected() const
 {
 	int error = 0;
@@ -74,38 +69,20 @@ bool Client::IsInChannel(const std::string &channel) const
 	return _channels.find(channel) != _channels.end();
 }
 
-/*
-void Client::JoinChannel(const std::string &channel)
+void	Client::LeaveChannels(void)
 {
-	if (this->IsInChannel(channel))
-		return;
-	_channels.push_back(channel);
-    if (_server)
-        _server->AddChannel(channel);
-}
-*/
-
-void Client::LeaveChannel(const std::string &channel)
-{
-	
-}
-
-
-const std::map<std::string, Channel*>& Client::GetChannels() const
-{
-	return _channels;
+	std::map<std::string, Channel*>::iterator it;
+	for (it = _channels.begin(); it != _channels.end(); ++it)
+	{
+		it->second->removeClient(_socketDescriptor);
+	}
+	_channels.clear();
 }
 
 void Client::AddChannel(Channel* channel)
 {
 	_channels.insert(std::make_pair(channel->getName(), channel));
 }
-
-const std::string &Client::GetReceivedData() const
-{
-	return _receivedData;
-}
-
 
 void Client::SendMessage(const std::string& target, const std::string& message)
 {
@@ -121,11 +98,6 @@ void Client::SendMessage(const std::string& target, const std::string& message)
 	}
 }
 
-int Client::GetSocketDescriptor() const
-{
-	return _socketDescriptor;
-}
-
 void Client::Close()
 {
 	if (_socketDescriptor != -1)
@@ -138,70 +110,40 @@ void Client::SendData(const std::string& data)
 		send(_socketDescriptor, data.c_str(), data.length(), 0);
 }
 
-//----------------SETTERS & GETTERS---------------------------------------------------
+//----------------[SETTERS]---------------------------------------------------
 
-void Client::SetAuthenticated(bool b)
-{
-	_authenticated = b;
-}
+bool Client::IsAuthenticated() { return (_authenticated); }
 
-bool Client::IsAuthenticated()
-{
-	return (_authenticated);
-}
+void Client::SetAuthenticated(bool b) { _authenticated = b; }
 
-const struct sockaddr_in &Client::GetAddress() const
-{
-	return _address;
-}
+void Client::SetNickname(const std::string &nickname) { _nickname = nickname; }
 
-void Client::SetNickname(const std::string &nickname)
-{
-	_nickname = nickname;
-}
+void Client::SetRealname(const std::string &realname) { _realName = realname; }
 
-std::string const &Client::GetNickname() const
-{
-	return _nickname;
-}
+void Client::SetHost(const std::string &host) { _hostName = host; }
 
-void Client::SetRealname(const std::string &realname)
-{
-	_realName = realname;
-}
+void Client::SetServer(const std::string &servername) { _serverName = servername; }
 
-std::string const &Client::GetRealname() const
-{
-	return _realName;
-}
+void Client::SetUsername(std::string const &username) { _username = username; }
 
-void Client::SetHost(const std::string &host)
-{
-	_hostName = host;
-}
+//----------------[GETTERS]---------------------------------------------------
 
-std::string const &Client::GetHost() const
-{
-	return _hostName;
-}
+const std::map<std::string, Channel*>& Client::GetChannels() const { return _channels; }
 
-void Client::SetServer(const std::string &servername)
-{
-	_serverName = servername;
-}
+time_t Client::GetLastActive() const { return _lastActive; }
 
-std::string const &Client::GetServer() const
-{
-	return _serverName;
-}
+const std::string &Client::GetReceivedData() const { return _receivedData; }
 
+int Client::GetSocketDescriptor() const { return _socketDescriptor; }
 
-void Client::SetUsername(std::string const &username)
-{
-	_username = username;
-}
+const struct sockaddr_in &Client::GetAddress() const { return _address; }
 
-std::string const &Client::GetUsername() const
-{
-	return _username;
-}
+std::string const &Client::GetNickname() const { return _nickname; }
+
+std::string const &Client::GetRealname() const { return _realName; }
+
+std::string const &Client::GetHost() const { return _hostName; }
+
+std::string const &Client::GetServer() const { return _serverName; }
+
+std::string const &Client::GetUsername() const { return _username; }
