@@ -6,7 +6,7 @@
 #    By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/28 16:38:05 by jlarrieu          #+#    #+#              #
-#    Updated: 2023/04/20 11:46:43 by ffeaugas         ###   ########.fr        #
+#    Updated: 2023/04/21 10:34:20 by ffeaugas         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,8 +15,6 @@ CFLAGS	=	-g #-Wall -Wextra -Werror -std=c++98
 
 SRCS	=	src/main.cpp					\
 			src/utils.cpp					\
-			src/utils_channel.cpp			\
-			src/utils_client.cpp			\
 			src/Client.cpp					\
 			src/Channel.cpp					\
 			src/Server/Server.cpp			\
@@ -29,6 +27,7 @@ SRCS	=	src/main.cpp					\
 			src/Server/cmd/Ping.cpp			\
 			src/Server/cmd/Pong.cpp			\
 			src/Server/cmd/PrivMsg.cpp		\
+			src/Server/cmd/Topic.cpp		\
 			src/Server/cmd/User.cpp		
 
 OBJ			= $(SRCS:.cpp=.o)

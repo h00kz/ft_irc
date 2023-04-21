@@ -79,6 +79,8 @@ Command ParseCommand(const std::string& commandStr)
 		return LIST;
 	} else if (commandStr == "MODE") {
 		return MODE;
+	} else if (commandStr == "TOPIC") {
+		return TOPIC;
 	} else {
 		return UNKNOWN;
 	}
@@ -128,8 +130,13 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 			HandleMode(client, iss);
 			break;
 		}
+		case TOPIC: {
+			HandleTopic(client, iss);
+			break;
+		}
 		case UNKNOWN: {
-				std::cout << "Unknown command: " << command << std::endl;
+			std::cout << "Unknown command: " << command << std::endl;
+			while(iss.get() != '\n');
 			break;
 		}
 	}
@@ -166,9 +173,9 @@ bool Server::HandleAuthentification(Client* client, const std::string& command, 
 				client->SendData("Nickname must be set\n");
 			if (client->GetUsername() == "")
 				client->SendData("Username must be set\n");
+			while(iss.get() != '\n');
 		}
 	}
-	while(iss.get() != '\n');
 	return true;
 }
 
@@ -253,13 +260,45 @@ void Server::SendPrivateMessage(const std::string& target, const std::string& me
 
 bool Server::DisconnectClient(Client* client, std::map<int, Client*>& clients)
 {
+	//Remove client from server client map and close its socket
 	if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
-  std::cerr << "Epoll_ctl DISCO: " << strerror(errno) << std::endl;
+	std::cerr << "Epoll_ctl DISCO: " << strerror(errno) << std::endl;
 	std::cout << "Client disconnected: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
 	client->Close();
 	clients.erase(client->GetSocketDescriptor());
+
+	//Remove this client from its channels' client maps
+	client->LeaveChannels();
+
+	//Delete empty channels
+	CloseEmptyChannels();
+
 	delete client;
 	return true;
+}
+
+void	Server::CloseEmptyChannels(void)
+{
+	std::vector<std::string> emptyChannels;
+	Channel	*tmp;
+
+	std::map<std::string, Channel*>::iterator it;
+	for (it = _channels.begin(); it != _channels.end(); ++it)
+	{
+		std::cout << it->second->getNbClients() << " clients left in the channel\n";
+
+		if (it->second->getNbClients() == 0) {
+			emptyChannels.push_back(it->first);
+		}
+	}
+	for (int i = 0; i < emptyChannels.size(); i++)
+	{
+		tmp = _channels.find(emptyChannels[i])->second;
+		_channels.erase(emptyChannels[i]);
+		std::cout << tmp << " channel deleted\n";
+		delete tmp;
+	}
+	emptyChannels.clear();
 }
 
 void Server::Run()
@@ -330,7 +369,7 @@ void Server::Run()
 									if (client->IsAuthenticated() && !client->GetNickname().empty() && !client->GetUsername().empty())
 									{
 										HandleCommand(client, command, iss);
-										++it;
+										// ++it;
 									}
 									else
 										if (!HandleAuthentification(client, command, iss)) break;
@@ -362,8 +401,6 @@ void Server::Run()
 	}
 }
 
-//Getters
-const std::map<int, Client*>& Server::GetClients() const
-{ 
-	return _clients;
-}
+//----------------[GETTERS]---------------------------------------------------
+
+const std::map<int, Client*>& Server::GetClients() const { return _clients; }

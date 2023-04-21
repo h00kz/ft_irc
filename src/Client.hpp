@@ -20,28 +20,11 @@ class Client
 		Client(int socketDescriptor, struct sockaddr_in address, Server* server);
 		~Client();
 
-		const struct sockaddr_in &GetAddress() const;
-
-		void SetNickname(const std::string &nickname);
-		const std::string &GetNickname() const;
-		void SetRealname(const std::string &nickname);
-		const std::string &GetRealname() const;
-		void SetHost(const std::string &nickname);
-		const std::string &GetHost() const;
-		void SetUsername(const std::string &username);
-		std::string const &GetUsername() const;
-		void SetServer(const std::string &username);
-		std::string const &GetServer() const;
-		
-		int GetSocketDescriptor() const;
-
 		void JoinChannel(const std::string &channel);
-		void LeaveChannel(const std::string &channel);
+		void	LeaveChannels(void);
 		Channel	*findChannel(const std::string &name);
 
-		const std::string &GetReceivedData() const;
 		int ReceiveData();
-		time_t GetLastActive() const;
 		void UpdateLastActive();
 
 		void	enterChannel(const std::string& name, Channel *channel);
@@ -52,12 +35,33 @@ class Client
 		void SendData(const std::string& data);
 		void SendMessage(const std::string &target, const std::string &message);
 
-		void SetAuthenticated(bool b);
 		bool IsAuthenticated();
 
-		const std::map<std::string, Channel*>& GetChannels() const;
 		void	AddChannel(Channel* channel);
 		
+
+		//Setters
+
+		void SetAuthenticated(bool b);
+		void SetNickname(const std::string &nickname);
+		void SetRealname(const std::string &nickname);
+		void SetHost(const std::string &nickname);
+		void SetUsername(const std::string &username);
+		void SetServer(const std::string &username);
+		
+		//Getters
+
+		const std::string &GetNickname() const;
+		const std::string &GetRealname() const;
+		const std::string &GetHost() const;
+		std::string const &GetUsername() const;
+		std::string const &GetServer() const;
+		int GetSocketDescriptor() const;
+		const std::string &GetReceivedData() const;
+		time_t GetLastActive() const;
+		const std::map<std::string, Channel*>& GetChannels() const;
+		const struct sockaddr_in &GetAddress() const;
+	
 	private:
 	
 		int _socketDescriptor;
