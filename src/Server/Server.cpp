@@ -266,13 +266,8 @@ bool Server::DisconnectClient(Client* client, std::map<int, Client*>& clients)
 	std::cout << "Client disconnected: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
 	client->Close();
 	clients.erase(client->GetSocketDescriptor());
-
-	//Remove this client from its channels' client maps
 	client->LeaveChannels();
-
-	//Delete empty channels
 	CloseEmptyChannels();
-
 	delete client;
 	return true;
 }

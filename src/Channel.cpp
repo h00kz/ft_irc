@@ -31,7 +31,9 @@ void    Channel::addClient(Client *client)
 
 void    Channel::removeClient(int socketDescriptor)
 {
+    t_client *tmp = _clients.find(socketDescriptor)->second;
     _clients.erase(socketDescriptor);
+    delete tmp;
 }
 
 Client	*Channel::findClient(const std::string &name)
