@@ -6,7 +6,7 @@
 #    By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/28 16:38:05 by jlarrieu          #+#    #+#              #
-#    Updated: 2023/04/21 10:34:20 by ffeaugas         ###   ########.fr        #
+#    Updated: 2023/04/21 21:17:36 by ffeaugas         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,6 +28,7 @@ SRCS	=	src/main.cpp					\
 			src/Server/cmd/Pong.cpp			\
 			src/Server/cmd/PrivMsg.cpp		\
 			src/Server/cmd/Topic.cpp		\
+			src/Server/cmd/Invite.cpp		\
 			src/Server/cmd/User.cpp		
 
 OBJ			= $(SRCS:.cpp=.o)
