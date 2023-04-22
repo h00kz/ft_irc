@@ -18,15 +18,8 @@ void    Channel::addClient(Client *client)
     t_client *newClient = new t_client;
 
     newClient->client = client;
-	printf("CLIENT : %p\n", findClient(newClient->client->GetNickname()));
-	if (findClient(newClient->client->GetNickname()) != NULL)
-	{
-    	_clients.insert(std::make_pair(newClient->client->GetSocketDescriptor(), newClient));
-		for (std::map<int, t_client*>::iterator it = _clients.begin();it != _clients.end();++it)
-			std::cout << it->second->client->GetNickname() << std::endl;
-	}
-    else
-        std::cout << "Client is already in this channel" << std::endl;
+    newClient->op = true;
+    this->_clients.insert(std::pair<int, t_client *>(client->GetSocketDescriptor(), newClient));
 }
 
 void    Channel::removeClient(int socketDescriptor)
