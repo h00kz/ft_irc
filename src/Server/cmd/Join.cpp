@@ -6,7 +6,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:47 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/21 21:59:59 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/04/22 10:49:29 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ void    Server::HandleJoin(Client *client, std::istringstream &iss)
 	else if (isValidChannelName(name) == false) {
 		client->SendData(name += " :Erroneus channel name\n");
 	}
-	else if (client->IsInChannel(name) == false) {
+	else if (client->IsInChannel(name)) {
 		client->SendData("JOIN :Already in channel\n");
 	}
 	else if (client->GetChannels().size() == 10) {
@@ -55,7 +55,9 @@ void    Server::HandleJoin(Client *client, std::istringstream &iss)
 		it->second->addClient(client);
 		client->AddChannel(it->second);
 		std::cout << "Client " << client->GetNickname() << " joined  channel " << name << "." << std::endl;
-		HandleTopic(client, iss);
+		if (it->second->IsInviteOnly())
+			
+		//HandleTopic(client, iss);
 	}
 	if (name.empty() == false)
     	while(iss.get() != '\n');

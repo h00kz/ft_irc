@@ -67,6 +67,18 @@ bool    Channel::IsOperator(int socketDescriptor) const
     return (false);
 }
 
+void    Channel::DeleteInvitation(int socketDescriptor)
+{
+    int i = 0;
+
+    for (; i < _invited_clients.size(); i++)
+    {
+        if (_invited_clients == socketDescriptor)
+            break;
+    }
+    _invited_clients.erase(_invited_clients.begin() + i);
+};
+
 //----------------[SETTERS]---------------------------------------------------
 
 void    Channel::SetInvitation(int socketDescriptor)

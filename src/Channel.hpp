@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string> 
 #include <map>
+#include <vector>
 #include "Client.hpp"
 
 typedef struct s_client
@@ -31,6 +32,8 @@ class Channel
         void    addClient(Client * client);
         void    removeClient(int socketDescriptor);
 		Client	*findClient(const std::string &name);
+
+        void    DeleteInvitation(int socketDescriptor);
 
         bool    IsInvited(int socketDescriptor) const;
         bool    IsOperator(int socketDescriptor) const;
