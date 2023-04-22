@@ -77,14 +77,14 @@ Command ParseCommand(const std::string& commandStr)
 		return PRIVMSG;
 	} else if (commandStr == "LIST") {
 		return LIST;
-	} else if (commandStr == "MODE") {
-		return MODE;
 	} else if (commandStr == "TOPIC") {
 		return TOPIC;
 	} else if (commandStr == "INVITE") {
 		return INVITE;
 	} else if (commandStr == "KICK") {
 		return KICK;
+	} else if (commandStr == "MODE") {
+	return MODE;
 	} else {
 		return UNKNOWN;
 	}
@@ -130,10 +130,6 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 			HandleList(client);
 			break;
 		}
-		case MODE: {
-			HandleMode(client, iss);
-			break;
-		}
 		case TOPIC: {
 			HandleTopic(client, iss);
 			break;
@@ -146,6 +142,10 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 			HandleKick(client, iss);
 			break;
 		}
+		case MODE: {
+			HandleMode(client, iss);
+			break;
+		}		
 		case UNKNOWN: {
 			std::cout << "Unknown command: " << command << std::endl;
 			while(iss.get() != '\n');

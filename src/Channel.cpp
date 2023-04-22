@@ -1,6 +1,6 @@
 #include "Channel.hpp"
 
-Channel::Channel(std::string name, Client *client) : _name(name), _topic(""), _key(""), _invite_only(false)
+Channel::Channel(std::string name, Client *client) : _name(name), _topic(""), _key(""), _invite_only(false), _limit(0)
 {
     t_client *newClient = new t_client;
     newClient->client = client;
@@ -74,22 +74,39 @@ void    Channel::DeleteInvitation(int socketDescriptor)
 
 //----------------[SETTERS]---------------------------------------------------
 
+void    Channel::SetTopicRestriction(bool mode) { this->_topic_allowed = mode; }
+
+void    Channel::SetInviteOnly(bool mode) { this->_invite_only = mode; }
+
 void    Channel::SetInvitation(int socketDescriptor)
 {
     if (IsInvited(socketDescriptor) == false)
         this->_invited_clients.push_back(socketDescriptor);
 };
 
-void    Channel::setKey(std::string key) { this->_key = key; }
+void    Channel::SetKey(std::string key) { this->_key = key; }
 
 void    Channel::setTopic(std::string topic) { this->_topic = topic; }
 
+void    Channel::SetOperator(int targetDescriptor, bool mode)
+{
+    this->_clients.find(targetDescriptor)->second->op = mode;
+}
+
+void    Channel::SetLimit(int limit) { this->_limit = limit; }
+
 //----------------[GETTERS]---------------------------------------------------
+
+bool    Channel::IsTopicRestricted(void) const { return (this->_topic_allowed); }
 
 std::string const Channel::getName(void) const { return (this->_name); }
 
 std::string    Channel::getTopic(void) const { return (this->_topic); }
 
+std::string Channel::getKey(void) const { return (this->_key); }
+
 int Channel::getNbClients(void) const { return (this->_clients.size()); }
 
 bool    Channel::IsInviteOnly(void) const { return (this->_invite_only); }
+
+int Channel::getLimit(void) const { return (this->_limit); }

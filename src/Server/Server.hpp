@@ -101,6 +101,12 @@ class Server
 
 		//Mode
 		void    HandleMode(Client *client, std::istringstream &iss);
+		void HandleInviteMode(Client *client, Channel *channel, char operation);
+		void HandleTopicMode(Client *client, Channel *channel, char operation);
+		void HandleKeyMode(Client *client, Channel *channel, std::istringstream &iss, char operation);
+		void HandleOperatorMode(Client *client, Channel *channel, std::istringstream &iss, char operation);
+		void HandleLimitMode(Client *client, Channel *channel, std::istringstream &iss, char operation);
+
 
 		//Topic
 		void    HandleTopic(Client *client, std::istringstream &iss);
