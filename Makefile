@@ -29,6 +29,7 @@ SRCS	=	src/main.cpp					\
 			src/Server/cmd/PrivMsg.cpp		\
 			src/Server/cmd/Topic.cpp		\
 			src/Server/cmd/Invite.cpp		\
+			src/Server/cmd/Kick.cpp			\
 			src/Server/cmd/User.cpp		
 
 OBJ			= $(SRCS:.cpp=.o)

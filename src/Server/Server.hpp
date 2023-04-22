@@ -36,7 +36,8 @@ enum Command {
 	LIST,
 	MODE,
 	TOPIC,
-	INVITE
+	INVITE,
+	KICK
 };
 
 class Server
@@ -107,6 +108,8 @@ class Server
 		//Invite
 		void    HandleInvite(Client *client, std::istringstream &iss);
 
+		//Kick
+		void	HandleKick(Client *client, std::istringstream &iss);
 
 		std::map<int, Client*>	_clients; // k: op_id, v: client
 		std::map<std::string, Channel*>	_channels;

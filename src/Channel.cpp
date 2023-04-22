@@ -73,7 +73,7 @@ void    Channel::DeleteInvitation(int socketDescriptor)
 
     for (; i < _invited_clients.size(); i++)
     {
-        if (_invited_clients == socketDescriptor)
+        if (_invited_clients[i] == socketDescriptor)
             break;
     }
     _invited_clients.erase(_invited_clients.begin() + i);
