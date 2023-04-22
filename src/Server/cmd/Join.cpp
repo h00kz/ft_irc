@@ -6,7 +6,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:47 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/22 16:34:50 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/04/22 17:37:26 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,8 +25,8 @@ static bool    isValidChannelName(std::string channel)
 
 void    Server::HandleJoin(Client *client, std::istringstream &iss)
 {
-	std::string name;
-	iss >> name;
+	std::string name, key;
+	iss >> name >> key;
 
 	std::cout << "JOIN called\n";
 	std::map<std::string, Channel*>::iterator it = _channels.find(name);
@@ -51,14 +51,19 @@ void    Server::HandleJoin(Client *client, std::istringstream &iss)
 	else if (it->second->IsInviteOnly() && it->second->IsInvited(client->GetSocketDescriptor() == false)) {
 		client->SendData(name += " :invitation required to join this channel\n");
 	}
+	else if (it->second->getKey().empty() == false && key != it->second->getKey()) {
+		client->SendData("JOIN :Wrong password\n");
+	}
+	else if (it->second->getLimit() != 0 && it->second->getNbClients() == it->second->getLimit()) {
+		client->SendData("JOIN :Channel full\n");
+	}
 	else {
 		it->second->addClient(client);
 		client->AddChannel(it->second);
 		std::cout << "Client " << client->GetNickname() << " joined  channel " << name << "." << std::endl;
 		if (it->second->IsInviteOnly())
 			it->second->DeleteInvitation(client->GetSocketDescriptor());
-		// HandleTopic(client, iss);
 	}
-	if (name.empty() == false)
+	if (key.empty() == false)
     	while(iss.get() != '\n');
 }

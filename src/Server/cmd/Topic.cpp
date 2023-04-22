@@ -19,7 +19,10 @@ void    Server::HandleTopic(Client *client, std::istringstream &iss)
         client->SendData("Invalid channel\n");
     }
     else if (client->IsInChannel(channelName) == false) {
-        client->SendData("Topic :Can't change topic outside of channel\n");
+        client->SendData("TOPIC :Can't change topic outside of channel\n");
+    }
+    else if (it->second->IsTopicRestricted() && it->second->IsOperator(client->GetSocketDescriptor()) == false) {
+        client->SendData("TOPIC :You must be operator to change topic\n");
     }
     else if (topicName.empty() == true && it->second->getTopic().empty() == true) {
         client->SendData(channelName.append(" as not topic yet\n"));
@@ -28,7 +31,7 @@ void    Server::HandleTopic(Client *client, std::istringstream &iss)
         client->SendData(channelName.append(" topic : ").append(it->second->getTopic().append("\n")));
     }
     else if (topicName[0] != ':') {
-        client->SendData("Topic :topic must be prefixed with \":\"\n");
+        client->SendData("TOPIC :topic must be prefixed with \":\"\n");
     }
     else {
         topicName.erase(0, 1);
