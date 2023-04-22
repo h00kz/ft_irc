@@ -83,6 +83,8 @@ Command ParseCommand(const std::string& commandStr)
 		return TOPIC;
 	} else if (commandStr == "INVITE") {
 		return INVITE;
+	} else if (commandStr == "KICK") {
+		return KICK;
 	} else {
 		return UNKNOWN;
 	}
@@ -138,6 +140,10 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 		}
 		case INVITE: {
 			HandleInvite(client, iss);
+			break;
+		}
+		case KICK: {
+			HandleKick(client, iss);
 			break;
 		}
 		case UNKNOWN: {

@@ -19,7 +19,7 @@ void    Server::HandlePart(Client *client, std::istringstream &iss)
 
 	std::map<std::string, Channel*>::iterator it = _channels.find(name);
     if (name.empty()) {
-        client->SendData("PASS :Not enough parameters\n");
+        client->SendData("PART :Not enough parameters\n");
     }
     else if (it == _channels.end()) {
         client->SendData("Channel does not exist\n");
@@ -31,8 +31,8 @@ void    Server::HandlePart(Client *client, std::istringstream &iss)
         client->GetChannels().erase(name);
         it->second->removeClient(client->GetSocketDescriptor());
     	CloseEmptyChannels();
+        std::cout << "Client left channel: " << name << std::endl;
     }
     if (name.empty() == false)
         while(iss.get() != '\n');
-    std::cout << "Client left channel: " << name << std::endl;
 }

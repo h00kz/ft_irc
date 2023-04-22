@@ -56,8 +56,8 @@ void    Server::HandleJoin(Client *client, std::istringstream &iss)
 		client->AddChannel(it->second);
 		std::cout << "Client " << client->GetNickname() << " joined  channel " << name << "." << std::endl;
 		if (it->second->IsInviteOnly())
-			
-		//HandleTopic(client, iss);
+			it->second->DeleteInvitation(client->GetSocketDescriptor());
+		// HandleTopic(client, iss);
 	}
 	if (name.empty() == false)
     	while(iss.get() != '\n');
