@@ -6,12 +6,12 @@
 #    By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/28 16:38:05 by jlarrieu          #+#    #+#              #
-#    Updated: 2023/04/22 17:06:38 by ffeaugas         ###   ########.fr        #
+#    Updated: 2023/04/24 17:57:49 by pdubacqu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC		=	c++
-CFLAGS	=	-g #-Wall -Wextra -Werror -std=c++98
+CFLAGS	=	-g -Wall -Wextra -Werror -std=c++98
 
 SRCS	=	src/main.cpp					\
 			src/utils.cpp					\

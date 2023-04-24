@@ -268,6 +268,11 @@ void Server::SendPrivateMessage(const std::string& target, const std::string& me
 		if (client != sender && client->GetNickname() == target) 
 			client->SendData(message);
 	}
+	if (it == _clients.end())
+	{
+		sender->SendData("This user does not exist\n");
+		std::cout << "This user does not exist\n";
+	}
 }
 
 bool Server::DisconnectClient(Client* client, std::map<int, Client*>& clients)
@@ -298,11 +303,11 @@ void	Server::CloseEmptyChannels(void)
 			emptyChannels.push_back(it->first);
 		}
 	}
-	for (int i = 0; i < emptyChannels.size(); i++)
+	for (size_t i = 0; i < emptyChannels.size(); i++)
 	{
 		tmp = _channels.find(emptyChannels[i])->second;
 		_channels.erase(emptyChannels[i]);
-		std::cout << tmp << " channel deleted\n";
+		std::cout << tmp->getName() << " channel deleted\n";
 		delete tmp;
 	}
 	emptyChannels.clear();
@@ -379,7 +384,13 @@ void Server::Run()
 										// ++it;
 									}
 									else
-										if (!HandleAuthentification(client, command, iss)) break;
+									{
+										if (!HandleAuthentification(client, command, iss)) 
+										{
+											it = _clients.begin();
+											break ;
+										}
+									}
 								}
 							}
 						}

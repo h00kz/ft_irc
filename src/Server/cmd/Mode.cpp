@@ -131,7 +131,7 @@ void    Server::HandleMode(Client *client, std::istringstream &iss)
     }
     else
     {
-        for (int i = 1; i < modes.length(); i++)
+        for (size_t i = 1; i < modes.length(); i++)
         {
             if (modes[i] == 'i')
                 HandleInviteMode(client, channel, modes[0]);

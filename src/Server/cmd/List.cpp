@@ -14,9 +14,7 @@
 
 void    Server::HandleList(Client *client)
 {
-/*
     client->SendData("channels available at the moment : \n");
-    for (std::vector<Channel *>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++)
-        client->SendData((*it)->getName() + "\n");
-*/
+    for (std::map<std::string, Channel *>::iterator it; it != _channels.end(); it++)
+        client->SendData("\t" + it->second->getName() + "\n");
 }

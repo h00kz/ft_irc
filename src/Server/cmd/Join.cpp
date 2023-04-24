@@ -46,6 +46,7 @@ void    Server::HandleJoin(Client *client, std::istringstream &iss)
 		Channel* newChannel = new Channel(name, client);
 		_channels.insert(std::make_pair(name, newChannel));
 		client->AddChannel(newChannel);
+		client->SendData("You joined the channel\n");
 		std::cout << "Channel " << name << " created and client joined." << std::endl;
 	}
 	else if (it->second->IsInviteOnly() && it->second->IsInvited(client->GetSocketDescriptor()) == false) {
@@ -62,6 +63,7 @@ void    Server::HandleJoin(Client *client, std::istringstream &iss)
 		it->second->addClient(client);
 		client->AddChannel(it->second);
 		std::cout << "Client " << client->GetNickname() << " joined  channel " << name << "." << std::endl;
+		client->SendData("You joined the channel\n");
 		if (it->second->IsInviteOnly())
 			it->second->DeleteInvitation(client->GetSocketDescriptor());
 	}
