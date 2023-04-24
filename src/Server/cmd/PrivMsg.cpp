@@ -25,5 +25,5 @@ void    Server::HandlePrivMsg(Client *client, std::istringstream &iss)
 	message = message.substr(message.find_first_not_of(" :"), message.length());
 	client->SendMessage(target, message);
 	client->UpdateLastActive();
-	std::cout << "Client sent message to " << target << ": " << message << std::endl;
+	std::cout << "Client try to sent message to " << target << ": " << message << std::endl;
 }

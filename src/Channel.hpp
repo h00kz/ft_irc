@@ -50,6 +50,7 @@ class Channel
         int                 getLimit(void) const;
         bool                IsInviteOnly(void) const;
         bool                IsTopicRestricted(void) const;
+        bool                CheckOperators(void);
 
         //Setters
         void    SetKey(std::string key);

@@ -24,5 +24,10 @@ void	Server::HandleKick(Client *client, std::istringstream &iss)
             this->_channels.find(channel)->second->removeClient(this->findClient(target_name)->GetSocketDescriptor());
             findClient(target_name)->SendData("KICK from " + channel + " " + comment + "\r\n");
         }
+        else
+        {
+            client->SendData("You cannot kick yourself\n");
+            std::cout << "client try to kick himself ...\n";
+        }
     }
 }

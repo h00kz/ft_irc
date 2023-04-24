@@ -5,6 +5,7 @@ Channel::Channel(std::string name, Client *client) : _name(name), _topic(""), _k
     t_client *newClient = new t_client;
     newClient->client = client;
     newClient->op = true;
+    _topic_allowed = false;
     _invite_only = false;
     this->_clients[client->GetSocketDescriptor()] = newClient;
 }
@@ -23,10 +24,28 @@ void    Channel::addClient(Client *client)
     this->_clients.insert(std::pair<int, t_client *>(client->GetSocketDescriptor(), newClient));
 }
 
+bool    Channel::CheckOperators(void)
+{
+    for (std::map<int, t_client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+    {
+        if (it->second->op == true)
+            return (true);
+    }
+    return (false);
+}
+
 void    Channel::removeClient(int socketDescriptor)
 {
     t_client *tmp = _clients.find(socketDescriptor)->second;
     _clients.erase(socketDescriptor);
+    if (this->CheckOperators() == false)
+    {
+        if (!_clients.empty())
+        {
+        _clients.begin()->second->op = true;
+        _clients.begin()->second->client->SendData("You are now operator on this channel\n");
+        }
+    }
     delete tmp;
 }
 
@@ -43,7 +62,7 @@ Client	*Channel::findClient(const std::string &name)
 
 bool    Channel::IsInvited(int socketDescriptor) const
 {
-    for (int i = 0; i < this->_invited_clients.size(); i++)
+    for (size_t i = 0; i < this->_invited_clients.size(); i++)
     {
         if (this->_invited_clients[i] == socketDescriptor)
             return (true);
@@ -63,7 +82,7 @@ bool    Channel::IsOperator(int socketDescriptor) const
 
 void    Channel::DeleteInvitation(int socketDescriptor)
 {
-    int i = 0;
+    size_t i = 0;
 
     for (; i < _invited_clients.size(); i++)
     {

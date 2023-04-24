@@ -101,7 +101,7 @@ void Client::SendMessage(const std::string& target, const std::string& message)
 			_server->SendPrivateMessage(target, formattedMessage, this);
 		else
 		{
-			this->SendData(target + " doesn't exist.\r\n");
+			this->SendData("You are not a member of this channel\r\n");
 			std::cout << "Client not in channel " << target << "\n";
 		}
 	}
