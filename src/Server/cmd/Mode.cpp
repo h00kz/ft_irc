@@ -59,16 +59,21 @@ void Server::HandleOperatorMode(Client *client, Channel *channel, std::istringst
 
     iss >> targetName;
     target = channel->findClient(targetName);
-    if (targetName.empty()) {
+    if (target == NULL)
+    {
+        client->SendData("MODE :Operator target is missing\n");
+        return ;
+    }
+    else if (targetName.empty()) {
         client->SendData("MODE :Operator target is missing\n");
     }
-    if (target->IsInChannel(targetName) == false) {   
-        client->SendData("MODE :Operator target not is channel\n");
+    else if (target->IsInChannel(channel->getName()) == false) {   
+        client->SendData("MODE :Operator target " + target->GetNickname() + " is not in channel\n");
     }
-    if (operation == '+')
-        channel->SetOperator(client->GetSocketDescriptor(), true);
+    else if (operation == '+')
+        channel->SetOperator(target->GetSocketDescriptor(), true);
     else
-        channel->SetOperator(client->GetSocketDescriptor(), false);
+        channel->SetOperator(target->GetSocketDescriptor(), false);
 }
 
 void Server::HandleLimitMode(Client *client, Channel *channel, std::istringstream &iss, char operation)
@@ -89,18 +94,24 @@ void Server::HandleLimitMode(Client *client, Channel *channel, std::istringstrea
             else if (limitNb < channel->getNbClients())
                 client->SendData("MODE :Limit cannot be inferior than number of users in channel\n");
             else
+            {
                 channel->SetLimit(limitNb);
+                client->SendData("limit has been set\n");
+            }
         }
     }
     else
+    {
         channel->SetLimit(0);
+        client->SendData("limit has been removed\n");
+    }
 }
 
 void    Server::HandleMode(Client *client, std::istringstream &iss)
 {
 
     std::string channelName, modes, trash;
-    iss >> channelName, modes;
+    iss >> channelName >> modes;
 
     Channel *channel = findChannel(channelName);
     if (modes.empty()) {
@@ -118,20 +129,23 @@ void    Server::HandleMode(Client *client, std::istringstream &iss)
     else if (channel->IsOperator(client->GetSocketDescriptor()) == false) {
         client->SendData("MODE : You are not operator on this channel\n");
     }
-    for (int i = 1; i < modes.length(); i++)
+    else
     {
-        if (modes[i] == 'i')
-            HandleInviteMode(client, channel, modes[0]);
-        else if (modes[i] == 't')
-            HandleTopicMode(client, channel, modes[0]);
-        else if (modes[i] == 'k')
-            HandleKeyMode(client, channel, iss, modes[0]);
-        else if (modes[i] == 'o')
-            HandleOperatorMode(client, channel, iss, modes[0]);
-        else if (modes[i] == 'l')
-            HandleLimitMode(client, channel, iss, modes[0]);
-        else
-            client->SendData("Invalid mode : " + modes[i] + '\n');
+        for (int i = 1; i < modes.length(); i++)
+        {
+            if (modes[i] == 'i')
+                HandleInviteMode(client, channel, modes[0]);
+            else if (modes[i] == 't')
+                HandleTopicMode(client, channel, modes[0]);
+            else if (modes[i] == 'k')
+                HandleKeyMode(client, channel, iss, modes[0]);
+            else if (modes[i] == 'o')
+                HandleOperatorMode(client, channel, iss, modes[0]);
+            else if (modes[i] == 'l')
+                HandleLimitMode(client, channel, iss, modes[0]);
+            else
+                client->SendData("Invalid mode : " + modes[i] + '\n');
+        }
     }
     iss >> trash;
     if (trash.empty() == false)

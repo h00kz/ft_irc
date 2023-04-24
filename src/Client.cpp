@@ -66,7 +66,7 @@ void	Client::enterChannel(const std::string& name, Channel *channel)
 
 bool Client::IsInChannel(const std::string &channel) const
 {
-	return _channels.find(channel) != _channels.end();
+		return (_channels.find(channel) != _channels.end());
 }
 
 void	Client::LeaveChannels(void)
@@ -79,6 +79,12 @@ void	Client::LeaveChannels(void)
 	_channels.clear();
 }
 
+void	Client::LeaveChannel(Channel* channel)
+{
+	_channels.erase(channel->getName());
+	std::cout << "Client " << _nickname << " leaved channel " << channel->getName() << std::endl;
+}
+
 void Client::AddChannel(Channel* channel)
 {
 	_channels.insert(std::make_pair(channel->getName(), channel));
@@ -89,12 +95,15 @@ void Client::SendMessage(const std::string& target, const std::string& message)
 	if (_server)
 	{
 		std::string formattedMessage = ":" + _nickname + " PRIVMSG " + target + " :" + message + "\r\n";
-		if (target[0] == '#')
+		if (target[0] == '#' && IsInChannel(target))
 			_server->BroadcastMessage(target, formattedMessage, this);
 		else if (target[0] != '#')
 			_server->SendPrivateMessage(target, formattedMessage, this);
 		else
-			std::cout << "This channel not exist.\n";
+		{
+			this->SendData(target + " doesn't exist.\r\n");
+			std::cout << "Client not in channel " << target << "\n";
+		}
 	}
 }
 

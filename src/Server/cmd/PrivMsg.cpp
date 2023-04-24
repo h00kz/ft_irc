@@ -17,7 +17,12 @@ void    Server::HandlePrivMsg(Client *client, std::istringstream &iss)
 	std::string target, message;
 	iss >> target;
 	getline(iss, message);
-	message = message.substr(message.find_first_of(":") + 1, message.length());
+	if (message.find(":") == std::string::npos)
+	{
+		client->SendData("Usage : PRIVMSG [channel] :[message]\n");
+		return ;
+	}
+	message = message.substr(message.find_first_not_of(" :"), message.length());
 	client->SendMessage(target, message);
 	client->UpdateLastActive();
 	std::cout << "Client sent message to " << target << ": " << message << std::endl;

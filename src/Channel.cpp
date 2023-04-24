@@ -5,6 +5,7 @@ Channel::Channel(std::string name, Client *client) : _name(name), _topic(""), _k
     t_client *newClient = new t_client;
     newClient->client = client;
     newClient->op = true;
+    _invite_only = false;
     this->_clients[client->GetSocketDescriptor()] = newClient;
 }
 
@@ -18,7 +19,7 @@ void    Channel::addClient(Client *client)
     t_client *newClient = new t_client;
 
     newClient->client = client;
-    newClient->op = true;
+    newClient->op = false;
     this->_clients.insert(std::pair<int, t_client *>(client->GetSocketDescriptor(), newClient));
 }
 
@@ -69,8 +70,9 @@ void    Channel::DeleteInvitation(int socketDescriptor)
         if (_invited_clients[i] == socketDescriptor)
             break;
     }
-    _invited_clients.erase(_invited_clients.begin() + i);
-};
+    if (_invited_clients.begin() + i != _invited_clients.end())
+        _invited_clients.erase(_invited_clients.begin() + i);
+}
 
 //----------------[SETTERS]---------------------------------------------------
 
@@ -82,7 +84,7 @@ void    Channel::SetInvitation(int socketDescriptor)
 {
     if (IsInvited(socketDescriptor) == false)
         this->_invited_clients.push_back(socketDescriptor);
-};
+}
 
 void    Channel::SetKey(std::string key) { this->_key = key; }
 
@@ -91,6 +93,7 @@ void    Channel::setTopic(std::string topic) { this->_topic = topic; }
 void    Channel::SetOperator(int targetDescriptor, bool mode)
 {
     this->_clients.find(targetDescriptor)->second->op = mode;
+    std::cout << "C: " << _clients.find(targetDescriptor)->second->client->GetNickname() << " op: " << _clients.find(targetDescriptor)->second->op << std::endl;
 }
 
 void    Channel::SetLimit(int limit) { this->_limit = limit; }

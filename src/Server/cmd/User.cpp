@@ -17,10 +17,12 @@ void    Server::HandleUser(Client *client, std::istringstream &iss)
     std::string username, host, server, realname;
 
     std::cout << "USER called\n";
-    iss >> username >> host >> server >> realname;
+    iss >> username >> host >> server;
+    getline(iss, realname);
+    realname = realname.substr(0, realname.find_last_not_of("\r\n") + 1);
     if (realname.empty() == true)
         client->SendData("USER :Not enough parameters\n");
-    else if (realname[0] != ':')
+    else if (realname[1] != ':')
     {
         std::cout << realname << std::endl;
         client->SendData("USER :realname must be prefixed with \":\"\n");
@@ -29,7 +31,7 @@ void    Server::HandleUser(Client *client, std::istringstream &iss)
         client->SendData("You may not reregister\n");
     else
     {
-        realname.erase(0, 1);
+        realname.erase(0, 2);
         client->SetUsername(username);
         client->SetHost(host);
         client->SetServer(server);
@@ -38,7 +40,7 @@ void    Server::HandleUser(Client *client, std::istringstream &iss)
         std::cout << "Client set host: " << host << std::endl;
         std::cout << "Client set server: " << server << std::endl;
         std::cout << "Client set real name: " << realname << std::endl;
-        }
-	if (realname.empty() == false)
-    	while(iss.get() != '\n');
+    }
+	// if (realname.empty() == false)
+    // 	while(iss.get() != '\n');
 }
