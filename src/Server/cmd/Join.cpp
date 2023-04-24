@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Join.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*   By: h00kz <h00kz@student.42.fr>                +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:47 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/22 17:37:26 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/04/22 22:25:00 by h00kz            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,4 +66,5 @@ void    Server::HandleJoin(Client *client, std::istringstream &iss)
 	}
 	if (key.empty() == false)
     	while(iss.get() != '\n');
+	client->UpdateLastActive();
 }

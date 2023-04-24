@@ -80,7 +80,7 @@ class Server
 		void    HandleJoin(Client *client, std::istringstream &iss);
 
 		//Ping
-		void    HandlePing(Client *client);
+		void    HandlePing(Client *client, std::istringstream &iss);
 		void	PingClients();
 
 		//Pong

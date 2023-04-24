@@ -111,7 +111,7 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 			break;
 		}
 		case PING: {
-			HandlePing(client);
+			HandlePing(client, iss);
 			break;
 		}
 		case PONG: {
@@ -397,8 +397,7 @@ void Server::Run()
 					if (currentTime - client->GetLastActive() > timeout)
 					{
 						std::cout << "Client timeout: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
-						delete client;
-						_clients.erase(it++);
+						DisconnectClient(client, _clients);
 					}
 					else
 						++it;
