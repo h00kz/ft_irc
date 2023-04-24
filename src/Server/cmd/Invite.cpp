@@ -8,7 +8,7 @@ void    Server::HandleInvite(Client *client, std::istringstream &iss)
     Client  *target;
     Channel *channel;
 
-    iss >> nickname, channelName;
+    iss >> nickname >> channelName;
     target = findClient(nickname);
     channel = findChannel(channelName);
     if (channelName.empty()) {

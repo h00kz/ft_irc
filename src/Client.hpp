@@ -28,6 +28,7 @@ class Client
 		void UpdateLastActive();
 
 		void	enterChannel(const std::string& name, Channel *channel);
+		void	LeaveChannel(Channel *channel);
 		bool IsInChannel(const std::string& channel) const;
 		bool IsConnected() const;
 		void Close();

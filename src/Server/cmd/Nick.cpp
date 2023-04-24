@@ -35,10 +35,9 @@ static bool    isValidNickname(std::string nickname)
 void    Server::HandleNick(Client *client, std::istringstream &iss)
 {
     std::string nickname;
-    iss >> nickname;
-
+    getline(iss, nickname);
+    nickname = nickname.substr(nickname.find_first_not_of(" "), nickname.find_last_not_of("\r\n"));
     std::cout << "NICK called\n";
-	
 	std::cout << "Nickname : [" << nickname << "]\n";
 	if (nickname.empty()) {
         client->SendData("NICK :Not enough parameters\n");
@@ -57,6 +56,4 @@ void    Server::HandleNick(Client *client, std::istringstream &iss)
 			std::cout << client->GetNickname() << " changed his nickname to " << nickname << std::endl;
 		client->SetNickname(nickname);
 	}
-	if (nickname.empty() == false)
-    	while(iss.get() != '\n');
 }			

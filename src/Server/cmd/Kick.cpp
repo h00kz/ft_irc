@@ -2,8 +2,10 @@
 
 void	Server::HandleKick(Client *client, std::istringstream &iss)
 {
-    std::string channel, target_name;
+    std::string channel, target_name, comment;
     iss >> channel >> target_name;
+    getline(iss, comment);
+    Channel* chan = findChannel(channel);
     if (target_name.empty())
         client->SendData("KICK :Need more params\n");
     else if (this->_channels.find(channel) == this->_channels.end())
@@ -16,9 +18,11 @@ void	Server::HandleKick(Client *client, std::istringstream &iss)
         client->SendData("KICK : Target not in channel\n");
     else
     {
-        this->findClient(target_name)->GetChannels().erase(channel);
-        this->_channels.find(channel)->second->removeClient(this->findClient(target_name)->GetSocketDescriptor());
+        if (client->GetNickname() != target_name)
+        {
+            this->findClient(target_name)->LeaveChannel(chan);
+            this->_channels.find(channel)->second->removeClient(this->findClient(target_name)->GetSocketDescriptor());
+            findClient(target_name)->SendData("KICK from " + channel + " " + comment + "\r\n");
+        }
     }
-    if (target_name.empty() == false)
-        while(iss.get() != '\n');
 }

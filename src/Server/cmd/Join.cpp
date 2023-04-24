@@ -48,8 +48,8 @@ void    Server::HandleJoin(Client *client, std::istringstream &iss)
 		client->AddChannel(newChannel);
 		std::cout << "Channel " << name << " created and client joined." << std::endl;
 	}
-	else if (it->second->IsInviteOnly() && it->second->IsInvited(client->GetSocketDescriptor() == false)) {
-		client->SendData(name += " :invitation required to join this channel\n");
+	else if (it->second->IsInviteOnly() && it->second->IsInvited(client->GetSocketDescriptor()) == false) {
+		client->SendData(name + " :invitation required to join this channel\n");
 	}
 	else if (it->second->getKey().empty() == false && key != it->second->getKey()) {
 		client->SendData("JOIN :Wrong password\n");
@@ -57,7 +57,8 @@ void    Server::HandleJoin(Client *client, std::istringstream &iss)
 	else if (it->second->getLimit() != 0 && it->second->getNbClients() == it->second->getLimit()) {
 		client->SendData("JOIN :Channel full\n");
 	}
-	else {
+	else 
+	{
 		it->second->addClient(client);
 		client->AddChannel(it->second);
 		std::cout << "Client " << client->GetNickname() << " joined  channel " << name << "." << std::endl;
