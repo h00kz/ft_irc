@@ -14,7 +14,6 @@ CC		=	c++
 CFLAGS	=	-g -Wall -Wextra -Werror -std=c++98
 
 SRCS	=	src/main.cpp					\
-			src/utils.cpp					\
 			src/Client.cpp					\
 			src/Channel.cpp					\
 			src/Server/Server.cpp			\
