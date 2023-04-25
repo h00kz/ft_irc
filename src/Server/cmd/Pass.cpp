@@ -34,8 +34,8 @@ void    Server::HandlePass(Client *client, std::istringstream &iss)
     }
     else
     {
-        std::cout << "Invalid password, client disconnected" << std::endl;
-        DisconnectClient(client, _clients);
+        std::cout << "Invalid password" << std::endl;
+        client->SendData("Invalid password\n");
     }
     // if (password.empty() == false)
     //     while(iss.get() != '\n');
