@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Mode.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:44 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/22 17:24:09 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/04/25 10:23:27 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,14 +96,14 @@ void Server::HandleLimitMode(Client *client, Channel *channel, std::istringstrea
             else
             {
                 channel->SetLimit(limitNb);
-                client->SendData("limit has been set\n");
+                client->SendData("MODE :Limit has been set\n");
             }
         }
     }
     else
     {
         channel->SetLimit(0);
-        client->SendData("limit has been removed\n");
+        client->SendData("MODE :Limit has been removed\n");
     }
 }
 
@@ -124,10 +124,10 @@ void    Server::HandleMode(Client *client, std::istringstream &iss)
         client->SendData("MODE :'+' or '-' required before mode char\n");
     }
     else if (client->IsInChannel(channelName) == false) {   
-        client->SendData("MODE : You are not in channel\n");
+        client->SendData("MODE :You are not in channel\n");
     }
     else if (channel->IsOperator(client->GetSocketDescriptor()) == false) {
-        client->SendData("MODE : You are not operator on this channel\n");
+        client->SendData("MODE :You are not operator on this channel\n");
     }
     else
     {
@@ -144,7 +144,7 @@ void    Server::HandleMode(Client *client, std::istringstream &iss)
             else if (modes[i] == 'l')
                 HandleLimitMode(client, channel, iss, modes[0]);
             else
-                client->SendData("Invalid mode : " + modes[i] + '\n');
+                client->SendData("MODE :Invalid mode : " + modes[i] + '\n');
         }
     }
     iss >> trash;
