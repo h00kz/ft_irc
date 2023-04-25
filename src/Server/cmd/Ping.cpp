@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Ping.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: h00kz <h00kz@student.42.fr>                +#+  +:+       +#+        */
+/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:37 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/24 07:39:12 by h00kz            ###   ########.fr       */
+/*   Updated: 2023/04/25 10:25:56 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@ void Server::PingClients()
 			if (currentTime - client->GetLastActive() > 60)
 			{
 				std::string pingCommand = "PING\r\n";
+				std::cout << "PING sent to " << inet_ntoa(client->GetAddress().sin_addr)
+											 << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
 				client->SendData(pingCommand);
 				client->UpdateLastActive();
 			}
@@ -38,5 +40,6 @@ void    Server::HandlePing(Client *client, std::istringstream &iss)
     std::string response = "PONG " + sender + "\r\n";
     client->SendData(response);
     client->UpdateLastActive();
-    std::cout << "PONG sent to " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
+    std::cout << "PONG sent to " << inet_ntoa(client->GetAddress().sin_addr)
+								 << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
 }

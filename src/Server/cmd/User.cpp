@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:29 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/21 15:21:36 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/04/25 10:15:26 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ void    Server::HandleUser(Client *client, std::istringstream &iss)
         client->SendData("USER :realname must be prefixed with \":\"\n");
     }
     else if (client->GetUsername().empty() == false)
-        client->SendData("You may not reregister\n");
+        client->SendData("USER :You may not reregister\n");
     else
     {
         realname.erase(0, 2);
@@ -41,6 +41,4 @@ void    Server::HandleUser(Client *client, std::istringstream &iss)
         std::cout << "Client set server: " << server << std::endl;
         std::cout << "Client set real name: " << realname << std::endl;
     }
-	// if (realname.empty() == false)
-    // 	while(iss.get() != '\n');
 }

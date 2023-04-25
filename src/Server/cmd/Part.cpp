@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Part.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:40 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/21 18:30:10 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/04/25 10:12:27 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,10 @@ void    Server::HandlePart(Client *client, std::istringstream &iss)
         client->SendData("PART :Not enough parameters\n");
     }
     else if (it == _channels.end()) {
-        client->SendData("Channel does not exist\n");
+        client->SendData("PART :Channel does not exist\n");
     }
     else if (client->GetChannels().find(name) == client->GetChannels().end()) {
-        client->SendData("Client isn't in channel\n");
+        client->SendData("PART :Client isn't in channel\n");
     }
     else {
         client->GetChannels().erase(name);
