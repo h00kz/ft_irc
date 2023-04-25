@@ -266,13 +266,13 @@ void Server::SendPrivateMessage(const std::string& target, const std::string& me
 	{
 		Client* client = it->second;
 		if (client != sender && client->GetNickname() == target) 
+		{
 			client->SendData(message);
+			break;
+		}
 	}
 	if (it == _clients.end())
-	{
-		sender->SendData("This user does not exist\n");
-		std::cout << "This user does not exist\n";
-	}
+		sender->SendData("PRIVMSG :This user does not exist\n");
 }
 
 bool Server::DisconnectClient(Client* client, std::map<int, Client*>& clients)
