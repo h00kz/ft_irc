@@ -6,20 +6,18 @@
 #    By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/28 16:38:05 by jlarrieu          #+#    #+#              #
-#    Updated: 2023/04/22 17:06:38 by ffeaugas         ###   ########.fr        #
+#    Updated: 2023/05/05 13:42:22 by ffeaugas         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC		=	c++
-CFLAGS	=	-g #-Wall -Wextra -Werror -std=c++98
+CFLAGS	=	-g -Wall -Wextra -Werror -std=c++98
 
 SRCS	=	src/main.cpp					\
-			src/utils.cpp					\
 			src/Client.cpp					\
 			src/Channel.cpp					\
 			src/Server/Server.cpp			\
 			src/Server/cmd/Join.cpp			\
-			src/Server/cmd/List.cpp			\
 			src/Server/cmd/Mode.cpp			\
 			src/Server/cmd/Nick.cpp			\
 			src/Server/cmd/Part.cpp			\
@@ -41,7 +39,7 @@ sgr0	:= $(shell tput sgr0)
 
 all: $(NAME)
 
-.cpp.o: $(SRCS)
+.o: $(SRCS)
 	@$(CC) $(CFLAGS) -c -o $@ $<
 
 $(NAME): $(OBJ)

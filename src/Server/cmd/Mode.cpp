@@ -6,7 +6,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:44 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/22 17:24:09 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/05 15:12:11 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,17 +58,25 @@ void Server::HandleOperatorMode(Client *client, Channel *channel, std::istringst
     Client  *target;
 
     iss >> targetName;
-    target = channel->findClient(targetName);
+    target = channel->FindClient(targetName);
     if (targetName.empty()) {
         client->SendData("MODE :Operator target is missing\n");
     }
-    if (target->IsInChannel(targetName) == false) {   
+    else if (target == NULL)
+        client->SendData("MODE :No such client\n");
+    else if (target->IsInChannel(channel->GetName()) == false) {   
         client->SendData("MODE :Operator target not is channel\n");
     }
-    if (operation == '+')
+    else if (operation == '+')
+    {
         channel->SetOperator(client->GetSocketDescriptor(), true);
+        target->SendData("Operator status updated\n");
+    }
     else
+    {
         channel->SetOperator(client->GetSocketDescriptor(), false);
+        target->SendData("Operator status updated\n");
+    }
 }
 
 void Server::HandleLimitMode(Client *client, Channel *channel, std::istringstream &iss, char operation)
@@ -86,7 +94,7 @@ void Server::HandleLimitMode(Client *client, Channel *channel, std::istringstrea
             limitNb = std::atoi(limit.c_str());
             if (limitNb < 1 || limitNb > 1000)
                 client->SendData("MODE :Invalid limit [Allowed range : 1 - 1000]\n");
-            else if (limitNb < channel->getNbClients())
+            else if (limitNb < channel->GetNbClients())
                 client->SendData("MODE :Limit cannot be inferior than number of users in channel\n");
             else
                 channel->SetLimit(limitNb);
@@ -100,9 +108,11 @@ void    Server::HandleMode(Client *client, std::istringstream &iss)
 {
 
     std::string channelName, modes, trash;
-    iss >> channelName, modes;
+    iss >> channelName;
+    iss >> modes;
 
-    Channel *channel = findChannel(channelName);
+	std::cout << "MODE called\n";
+    Channel *channel = FindChannel(channelName);
     if (modes.empty()) {
         client->SendData("MODE :Need more params\n");
     }
@@ -118,20 +128,23 @@ void    Server::HandleMode(Client *client, std::istringstream &iss)
     else if (channel->IsOperator(client->GetSocketDescriptor()) == false) {
         client->SendData("MODE : You are not operator on this channel\n");
     }
-    for (int i = 1; i < modes.length(); i++)
+    else
     {
-        if (modes[i] == 'i')
-            HandleInviteMode(client, channel, modes[0]);
-        else if (modes[i] == 't')
-            HandleTopicMode(client, channel, modes[0]);
-        else if (modes[i] == 'k')
-            HandleKeyMode(client, channel, iss, modes[0]);
-        else if (modes[i] == 'o')
-            HandleOperatorMode(client, channel, iss, modes[0]);
-        else if (modes[i] == 'l')
-            HandleLimitMode(client, channel, iss, modes[0]);
-        else
-            client->SendData("Invalid mode : " + modes[i] + '\n');
+        for (size_t i = 1; i < modes.length(); i++)
+        {
+            if (modes[i] == 'i')
+                HandleInviteMode(client, channel, modes[0]);
+            else if (modes[i] == 't')
+                HandleTopicMode(client, channel, modes[0]);
+            else if (modes[i] == 'k')
+                HandleKeyMode(client, channel, iss, modes[0]);
+            else if (modes[i] == 'o')
+                HandleOperatorMode(client, channel, iss, modes[0]);
+            else if (modes[i] == 'l')
+                HandleLimitMode(client, channel, iss, modes[0]);
+            else
+                client->SendData("Invalid mode\n");
+        }
     }
     iss >> trash;
     if (trash.empty() == false)

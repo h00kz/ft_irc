@@ -1,4 +1,14 @@
-
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Invite.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/05/05 11:11:43 by ffeaugas          #+#    #+#             */
+/*   Updated: 2023/05/05 15:39:23 by ffeaugas         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include "../Server.hpp"
 
@@ -8,9 +18,10 @@ void    Server::HandleInvite(Client *client, std::istringstream &iss)
     Client  *target;
     Channel *channel;
 
-    iss >> nickname, channelName;
-    target = findClient(nickname);
-    channel = findChannel(channelName);
+    iss >> nickname;
+    iss >> channelName;
+    target = FindClient(nickname);
+    channel = FindChannel(channelName);
     if (channelName.empty()) {
         client->SendData("INVITE :Need more params\n");
     }

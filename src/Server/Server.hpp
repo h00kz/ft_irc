@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Server.hpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/05/05 11:13:10 by ffeaugas          #+#    #+#             */
+/*   Updated: 2023/05/05 11:34:31 by ffeaugas         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
@@ -10,6 +22,7 @@
 # include <sys/epoll.h>
 # include <arpa/inet.h>
 # include <cstdlib>
+# include <string> 
 # include <cstring>
 # include <unistd.h>
 # include <sys/types.h>
@@ -33,7 +46,6 @@ enum Command {
 	PASS,
 	PRIVMSG,
 	UNKNOWN,
-	LIST,
 	MODE,
 	TOPIC,
 	INVITE,
@@ -42,33 +54,24 @@ enum Command {
 
 class Server
 {
-	public:
-		/*			CONSTRUCTORS/DES		 */
-					Server();
-					Server(int port, std::string const &passwd);
-					~Server();
-
-		/*			ACCESSORS			 */
-		std::map<int, Client*> const&	GetClients() const;
-		Client		*findClient(const std::string &name);
-		Channel		*findChannel(const std::string &name);
-		void		JoinChannel(Client* client, const std::string& chanName);
-		void		CloseEmptyChannels(void);
-
-		/*			Pb_FUNCTIONS		 */
-		void		Run();
-		void		BroadcastMessage(const std::string& channel, const std::string& message, Client* sender);
-		void		SendPrivateMessage(const std::string& target, const std::string& message, Client* sender);
-		void 		RemoveChannel(const std::string &channel);
-		void 		Close();
-
 	private:
+		
+		std::map<int, Client*>			_clients;
+		std::map<std::string, Channel*>	_channels;
+		sockaddr_in						_servAddr;
+		std::string const				_serverPasswd;
+		std::string const				_serverName;
+		int								_serverSd;
+		int								_port;
+		int								_epollFd;
+
 		/*			Pv_FUNCTIONS		 */
+
 		bool		DisconnectClient(Client* client, std::map<int, Client*>& clients);
 		void 		HandleCommand(Client* client, const std::string& command, std::istringstream& iss);
 		bool		HandleAuthentification(Client* client, const std::string& command, std::istringstream& iss);		
 
-		//-----------CMD-----------------
+		/*			CMD			 */
 
 		//User
 		void    HandleUser(Client *client, std::istringstream &iss);
@@ -96,17 +99,13 @@ class Server
 		//Part
 		void    HandlePart(Client *client, std::istringstream &iss);
 
-		//List
-		void   	HandleList(Client *client);
-
 		//Mode
 		void    HandleMode(Client *client, std::istringstream &iss);
-		void HandleInviteMode(Client *client, Channel *channel, char operation);
-		void HandleTopicMode(Client *client, Channel *channel, char operation);
-		void HandleKeyMode(Client *client, Channel *channel, std::istringstream &iss, char operation);
-		void HandleOperatorMode(Client *client, Channel *channel, std::istringstream &iss, char operation);
-		void HandleLimitMode(Client *client, Channel *channel, std::istringstream &iss, char operation);
-
+		void	HandleInviteMode(Client *client, Channel *channel, char operation);
+		void 	HandleTopicMode(Client *client, Channel *channel, char operation);
+		void 	HandleKeyMode(Client *client, Channel *channel, std::istringstream &iss, char operation);
+		void 	HandleOperatorMode(Client *client, Channel *channel, std::istringstream &iss, char operation);
+		void 	HandleLimitMode(Client *client, Channel *channel, std::istringstream &iss, char operation);
 
 		//Topic
 		void    HandleTopic(Client *client, std::istringstream &iss);
@@ -117,14 +116,25 @@ class Server
 		//Kick
 		void	HandleKick(Client *client, std::istringstream &iss);
 
-		std::map<int, Client*>	_clients; // k: op_id, v: client
-		std::map<std::string, Channel*>	_channels;
-		sockaddr_in				_servAddr;
-		std::string const		_serverPasswd;
-		std::string const		_serverName;
-		int						_serverSd;
-		int						_port;
-		int						_epollFd;
+	public:
+		/*			CONSTRUCTORS/DES		 */
+		Server();
+		Server(int port, std::string const &passwd);
+		~Server();
+
+		/*			ACCESSORS			 */
+		std::map<int, Client*> const&	GetClients() const;
+		Client		*FindClient(const std::string &name);
+		Channel		*FindChannel(const std::string &name);
+		void		JoinChannel(Client* client, const std::string& chanName);
+		void		CloseEmptyChannels(void);
+
+		/*			Pb_FUNCTIONS		 */
+		void		Run();
+		void		BroadcastMessage(const std::string& channel, const std::string& message, Client* sender);
+		void		SendPrivateMessage(const std::string& target, const std::string& message, Client* sender);
+		void 		RemoveChannel(const std::string &channel);
+		void 		Close();
 };
 
 #endif

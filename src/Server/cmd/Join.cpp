@@ -6,7 +6,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:47 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/22 17:37:26 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/05 16:19:00 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,17 +48,17 @@ void    Server::HandleJoin(Client *client, std::istringstream &iss)
 		client->AddChannel(newChannel);
 		std::cout << "Channel " << name << " created and client joined." << std::endl;
 	}
-	else if (it->second->IsInviteOnly() && it->second->IsInvited(client->GetSocketDescriptor() == false)) {
-		client->SendData(name += " :invitation required to join this channel\n");
+	else if (it->second->IsInviteOnly() && it->second->IsInvited(client->GetSocketDescriptor()) == false) {
+		client->SendData("Invitation required to join this channel\n");
 	}
-	else if (it->second->getKey().empty() == false && key != it->second->getKey()) {
+	else if (it->second->GetKey().empty() == false && key != it->second->GetKey()) {
 		client->SendData("JOIN :Wrong password\n");
 	}
-	else if (it->second->getLimit() != 0 && it->second->getNbClients() == it->second->getLimit()) {
+	else if (it->second->GetLimit() != 0 && it->second->GetNbClients() == it->second->GetLimit()) {
 		client->SendData("JOIN :Channel full\n");
 	}
 	else {
-		it->second->addClient(client);
+		it->second->AddClient(client);
 		client->AddChannel(it->second);
 		std::cout << "Client " << client->GetNickname() << " joined  channel " << name << "." << std::endl;
 		if (it->second->IsInviteOnly())

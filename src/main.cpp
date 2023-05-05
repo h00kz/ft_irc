@@ -1,9 +1,20 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/05/05 11:18:33 by ffeaugas          #+#    #+#             */
+/*   Updated: 2023/05/05 11:35:01 by ffeaugas         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Server/Server.hpp"
 #include <csignal>
 
 Server* g_server = NULL;
 bool	quitStatus = false;
-
 
 void mhandleSigint(int signal)
 {

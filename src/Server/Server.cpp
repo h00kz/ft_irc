@@ -1,5 +1,17 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Server.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/05/05 11:12:55 by ffeaugas          #+#    #+#             */
+/*   Updated: 2023/05/05 15:48:15 by ffeaugas         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Server.hpp"
-#include "../utils.h"
+
 static volatile bool quitStatus = false;
 
 void shandleSigint(int signal)
@@ -75,8 +87,6 @@ Command ParseCommand(const std::string& commandStr)
 		return PASS;
 	} else if (commandStr == "PRIVMSG") {
 		return PRIVMSG;
-	} else if (commandStr == "LIST") {
-		return LIST;
 	} else if (commandStr == "TOPIC") {
 		return TOPIC;
 	} else if (commandStr == "INVITE") {
@@ -124,10 +134,6 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 		}
 		case PART: {
 			HandlePart(client, iss);
-			break;
-		}
-		case LIST: {
-			HandleList(client);
 			break;
 		}
 		case TOPIC: {
@@ -216,7 +222,7 @@ Server::~Server()
 	close(_serverSd);
 }
 
-Client	*Server::findClient(const std::string &name)
+Client	*Server::FindClient(const std::string &name)
 {
     for (std::map<int, Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
     {
@@ -227,7 +233,7 @@ Client	*Server::findClient(const std::string &name)
     return (NULL);
 }
 
-Channel	*Server::findChannel(const std::string &name)
+Channel	*Server::FindChannel(const std::string &name)
 {
     
     std::map<std::string, Channel *>::iterator it = _channels.find(name);
@@ -240,7 +246,7 @@ void Server::RemoveChannel(const std::string &name)
 {
 	Channel *channel;
 
-	channel = findChannel(name);
+	channel = FindChannel(name);
 	if (channel != NULL)
 	{
 		delete (channel);
@@ -275,7 +281,8 @@ bool Server::DisconnectClient(Client* client, std::map<int, Client*>& clients)
 	//Remove client from server client map and close its socket
 	if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
 	std::cerr << "Epoll_ctl DISCO: " << strerror(errno) << std::endl;
-	std::cout << "Client disconnected: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
+	std::cout << "Client disconnected: " << inet_ntoa(client->GetAddress().sin_addr) << ":"
+	<< ntohs(client->GetAddress().sin_port) << std::endl;
 	client->Close();
 	clients.erase(client->GetSocketDescriptor());
 	client->LeaveChannels();
@@ -292,13 +299,13 @@ void	Server::CloseEmptyChannels(void)
 	std::map<std::string, Channel*>::iterator it;
 	for (it = _channels.begin(); it != _channels.end(); ++it)
 	{
-		std::cout << it->second->getNbClients() << " clients left in the channel\n";
+		std::cout << it->second->GetNbClients() << " clients left in the channel\n";
 
-		if (it->second->getNbClients() == 0) {
+		if (it->second->GetNbClients() == 0) {
 			emptyChannels.push_back(it->first);
 		}
 	}
-	for (int i = 0; i < emptyChannels.size(); i++)
+	for (size_t i = 0; i < emptyChannels.size(); i++)
 	{
 		tmp = _channels.find(emptyChannels[i])->second;
 		_channels.erase(emptyChannels[i]);
@@ -368,16 +375,13 @@ void Server::Run()
 							std::string receivedData = client->GetReceivedData();
 							std::istringstream iss(receivedData);
 							std::string command;
-							std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
+							std::cout << "- - - - - - - - - - - - - - - -\n" << receivedData;
 							while (iss >> command)
 							{
 								if (_clients.size() > 0)
 								{
 									if (client->IsAuthenticated() && !client->GetNickname().empty() && !client->GetUsername().empty())
-									{
 										HandleCommand(client, command, iss);
-										// ++it;
-									}
 									else
 										if (!HandleAuthentification(client, command, iss)) break;
 								}
@@ -396,7 +400,8 @@ void Server::Run()
 					Client* client = it->second;
 					if (currentTime - client->GetLastActive() > timeout)
 					{
-						std::cout << "Client timeout: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
+						std::cout << "Client timeout: " << inet_ntoa(client->GetAddress().sin_addr) << ":"
+						<< ntohs(client->GetAddress().sin_port) << std::endl;
 						delete client;
 						_clients.erase(it++);
 					}

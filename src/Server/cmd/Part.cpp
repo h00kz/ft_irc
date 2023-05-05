@@ -6,7 +6,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:40 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/21 18:30:10 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/05 11:03:53 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 void    Server::HandlePart(Client *client, std::istringstream &iss)
 {
     std::string name;
-    iss >> name;
 
+    iss >> name;
 	std::map<std::string, Channel*>::iterator it = _channels.find(name);
     if (name.empty()) {
         client->SendData("PART :Not enough parameters\n");
@@ -29,7 +29,7 @@ void    Server::HandlePart(Client *client, std::istringstream &iss)
     }
     else {
         client->GetChannels().erase(name);
-        it->second->removeClient(client->GetSocketDescriptor());
+        it->second->RemoveClient(client->GetSocketDescriptor());
     	CloseEmptyChannels();
         std::cout << "Client left channel: " << name << std::endl;
     }
