@@ -1,5 +1,17 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Server.cpp                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/05/06 18:31:13 by ffeaugas          #+#    #+#             */
+/*   Updated: 2023/05/06 18:46:24 by ffeaugas         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Server.hpp"
-#include "../utils.h"
+
 static volatile bool quitStatus = false;
 
 void shandleSigint(int signal)
@@ -216,7 +228,7 @@ Server::~Server()
 	close(_serverSd);
 }
 
-Client	*Server::findClient(const std::string &name)
+Client	*Server::FindClient(const std::string &name)
 {
     for (std::map<int, Client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
     {
@@ -227,7 +239,7 @@ Client	*Server::findClient(const std::string &name)
     return (NULL);
 }
 
-Channel	*Server::findChannel(const std::string &name)
+Channel	*Server::FindChannel(const std::string &name)
 {
     
     std::map<std::string, Channel *>::iterator it = _channels.find(name);
@@ -240,7 +252,7 @@ void Server::RemoveChannel(const std::string &name)
 {
 	Channel *channel;
 
-	channel = findChannel(name);
+	channel = FindChannel(name);
 	if (channel != NULL)
 	{
 		delete (channel);
@@ -297,9 +309,9 @@ void	Server::CloseEmptyChannels(void)
 	std::map<std::string, Channel*>::iterator it;
 	for (it = _channels.begin(); it != _channels.end(); ++it)
 	{
-		std::cout << it->second->getNbClients() << " clients left in the channel\n";
+		std::cout << it->second->GetNbClients() << " clients left in the channel\n";
 
-		if (it->second->getNbClients() == 0) {
+		if (it->second->GetNbClients() == 0) {
 			emptyChannels.push_back(it->first);
 		}
 	}
@@ -307,7 +319,7 @@ void	Server::CloseEmptyChannels(void)
 	{
 		tmp = _channels.find(emptyChannels[i])->second;
 		_channels.erase(emptyChannels[i]);
-		std::cout << tmp->getName() << " channel deleted\n";
+		std::cout << tmp->GetName() << " channel deleted\n";
 		delete tmp;
 	}
 	emptyChannels.clear();

@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Channel.cpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/05/06 18:31:29 by ffeaugas          #+#    #+#             */
+/*   Updated: 2023/05/06 18:57:50 by ffeaugas         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "Channel.hpp"
 
 Channel::Channel(std::string name, Client *client) : _name(name), _topic(""), _key(""), _invite_only(false), _limit(0)
@@ -5,17 +17,14 @@ Channel::Channel(std::string name, Client *client) : _name(name), _topic(""), _k
     t_client *newClient = new t_client;
     newClient->client = client;
     newClient->op = true;
-    _topic_allowed = false;
+    _topic_restricted = false;
     _invite_only = false;
     this->_clients[client->GetSocketDescriptor()] = newClient;
 }
 
-Channel::~Channel()
-{
-}
+Channel::~Channel() {}
 
-
-void    Channel::addClient(Client *client)
+void    Channel::AddClient(Client *client)
 {
     t_client *newClient = new t_client;
 
@@ -24,17 +33,7 @@ void    Channel::addClient(Client *client)
     this->_clients.insert(std::pair<int, t_client *>(client->GetSocketDescriptor(), newClient));
 }
 
-bool    Channel::CheckOperators(void)
-{
-    for (std::map<int, t_client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
-    {
-        if (it->second->op == true)
-            return (true);
-    }
-    return (false);
-}
-
-void    Channel::removeClient(int socketDescriptor)
+void    Channel::RemoveClient(int socketDescriptor)
 {
     t_client *tmp = _clients.find(socketDescriptor)->second;
     _clients.erase(socketDescriptor);
@@ -49,7 +48,7 @@ void    Channel::removeClient(int socketDescriptor)
     delete tmp;
 }
 
-Client	*Channel::findClient(const std::string &name)
+Client	*Channel::FindClient(const std::string &name)
 {
     for (std::map<int, t_client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
     {
@@ -58,26 +57,6 @@ Client	*Channel::findClient(const std::string &name)
             return (client);
     }
     return (NULL);
-}
-
-bool    Channel::IsInvited(int socketDescriptor) const
-{
-    for (size_t i = 0; i < this->_invited_clients.size(); i++)
-    {
-        if (this->_invited_clients[i] == socketDescriptor)
-            return (true);
-    }
-    return (false);
-}
-
-bool    Channel::IsOperator(int socketDescriptor) const
-{
-    t_client    *client;
-
-    client = this->_clients.find(socketDescriptor)->second;
-    if (client != NULL && client->op)
-        return (true); 
-    return (false);
 }
 
 void    Channel::DeleteInvitation(int socketDescriptor)
@@ -93,9 +72,19 @@ void    Channel::DeleteInvitation(int socketDescriptor)
         _invited_clients.erase(_invited_clients.begin() + i);
 }
 
+bool    Channel::CheckOperators(void)
+{
+    for (std::map<int, t_client *>::iterator it = _clients.begin(); it != _clients.end(); ++it)
+    {
+        if (it->second->op == true)
+            return (true);
+    }
+    return (false);
+}
+
 //----------------[SETTERS]---------------------------------------------------
 
-void    Channel::SetTopicRestriction(bool mode) { this->_topic_allowed = mode; }
+void    Channel::SetTopicRestriction(bool mode) { this->_topic_restricted = mode; }
 
 void    Channel::SetInviteOnly(bool mode) { this->_invite_only = mode; }
 
@@ -119,16 +108,36 @@ void    Channel::SetLimit(int limit) { this->_limit = limit; }
 
 //----------------[GETTERS]---------------------------------------------------
 
-bool    Channel::IsTopicRestricted(void) const { return (this->_topic_allowed); }
+bool    Channel::IsTopicRestricted(void) const { return (this->_topic_restricted); }
 
-std::string const Channel::getName(void) const { return (this->_name); }
+std::string const Channel::GetName(void) const { return (this->_name); }
 
-std::string    Channel::getTopic(void) const { return (this->_topic); }
+std::string    Channel::GetTopic(void) const { return (this->_topic); }
 
-std::string Channel::getKey(void) const { return (this->_key); }
+std::string Channel::GetKey(void) const { return (this->_key); }
 
-int Channel::getNbClients(void) const { return (this->_clients.size()); }
+int Channel::GetNbClients(void) const { return (this->_clients.size()); }
 
 bool    Channel::IsInviteOnly(void) const { return (this->_invite_only); }
 
-int Channel::getLimit(void) const { return (this->_limit); }
+int Channel::GetLimit(void) const { return (this->_limit); }
+
+bool    Channel::IsInvited(int socketDescriptor) const
+{
+    for (size_t i = 0; i < this->_invited_clients.size(); i++)
+    {
+        if (this->_invited_clients[i] == socketDescriptor)
+            return (true);
+    }
+    return (false);
+}
+
+bool    Channel::IsOperator(int socketDescriptor) const
+{
+    t_client    *client;
+
+    client = this->_clients.find(socketDescriptor)->second;
+    if (client != NULL && client->op)
+        return (true); 
+    return (false);
+}

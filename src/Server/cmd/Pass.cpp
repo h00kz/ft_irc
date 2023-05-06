@@ -3,14 +3,13 @@
 /*                                                        :::      ::::::::   */
 /*   Pass.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:38 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/25 10:12:07 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/05/06 18:34:29 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../../utils.h"
 #include "../Server.hpp"
 
 void    Server::HandlePass(Client *client, std::istringstream &iss)

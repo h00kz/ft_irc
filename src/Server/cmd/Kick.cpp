@@ -1,11 +1,24 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Kick.cpp                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/05/06 18:32:14 by ffeaugas          #+#    #+#             */
+/*   Updated: 2023/05/06 19:39:39 by ffeaugas         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../Server.hpp"
 
 void	Server::HandleKick(Client *client, std::istringstream &iss)
 {
     std::string channel, target_name, comment;
+    
     iss >> channel >> target_name;
     getline(iss, comment);
-    Channel* chan = findChannel(channel);
+    Channel* chan = FindChannel(channel);
     if (target_name.empty())
         client->SendData("KICK :Need more params\n");
     else if (this->_channels.find(channel) == this->_channels.end())
@@ -14,15 +27,15 @@ void	Server::HandleKick(Client *client, std::istringstream &iss)
         client->SendData("KICK : You are not in channel\n");
     else if (!this->_channels.find(channel)->second->IsOperator(client->GetSocketDescriptor()))
         client->SendData("KICK : You are not operator on this channel\n");
-    else if (!this->_channels.find(channel)->second->findClient(target_name))
+    else if (!this->_channels.find(channel)->second->FindClient(target_name))
         client->SendData("KICK : Target not in channel\n");
     else
     {
         if (client->GetNickname() != target_name)
         {
-            this->findClient(target_name)->LeaveChannel(chan);
-            this->_channels.find(channel)->second->removeClient(this->findClient(target_name)->GetSocketDescriptor());
-            findClient(target_name)->SendData("KICK from " + channel + " " + comment + "\r\n");
+            this->FindClient(target_name)->LeaveChannel(chan);
+            this->_channels.find(channel)->second->RemoveClient(this->FindClient(target_name)->GetSocketDescriptor());
+            FindClient(target_name)->SendData("Kicked from " + channel + " " + comment + "\r\n");
         }
         else
         {

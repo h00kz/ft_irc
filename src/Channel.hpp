@@ -1,11 +1,23 @@
-#ifndef CHANNEL_H
-#define CHANNEL_H
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   Channel.hpp                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2023/05/06 18:36:14 by ffeaugas          #+#    #+#             */
+/*   Updated: 2023/05/06 19:28:33 by ffeaugas         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#include <iostream>
-#include <string> 
-#include <map>
-#include <vector>
-#include "Client.hpp"
+#ifndef CHANNEL_H
+# define CHANNEL_H
+
+# include <iostream>
+# include <string> 
+# include <map>
+# include <vector>
+# include "Client.hpp"
 
 typedef struct s_client
 {
@@ -22,7 +34,7 @@ class Channel
         std::string                         _topic;
         std::string                         _key;
         bool                                _invite_only;
-        bool                                _topic_allowed;
+        bool                                _topic_restricted;
         std::vector<int>                    _invited_clients;
         int                                 _limit;
 
@@ -30,28 +42,23 @@ class Channel
         ~Channel();
         Channel(std::string name, Client *client);
         
-		
-        void    addClient(Client * client);
-        void    removeClient(int socketDescriptor);
-		Client	*findClient(const std::string &name);
-
+        void    AddClient(Client * client);
+        void    RemoveClient(int socketDescriptor);
+		Client	*FindClient(const std::string &name);
         void    DeleteInvitation(int socketDescriptor);
-
-        bool    IsInvited(int socketDescriptor) const;
-        bool    IsOperator(int socketDescriptor) const;
-        
-        void    sendMessage(std::string message);
+        bool    CheckOperators(void);
         
         //Getters
-        const   std::string getName(void) const;
-        std::string         getTopic(void) const;
-		int                 getNbClients(void) const;
-        std::string         getKey(void) const;
-        int                 getLimit(void) const;
+        const   std::string GetName(void) const;
+        std::string         GetTopic(void) const;
+		int                 GetNbClients(void) const;
+        std::string         GetKey(void) const;
+        int                 GetLimit(void) const;
         bool                IsInviteOnly(void) const;
         bool                IsTopicRestricted(void) const;
-        bool                CheckOperators(void);
-
+        bool                IsInvited(int socketDescriptor) const;
+        bool                IsOperator(int socketDescriptor) const;
+    
         //Setters
         void    SetKey(std::string key);
         void    SetTopicRestriction(bool mode);
@@ -60,7 +67,6 @@ class Channel
         void    SetInvitation(int socketDescriptor);
         void    SetOperator(int targetDescriptor, bool mode);
         void    SetLimit(int limit);
-        // void    setMode(std::string);
 };
 
 #endif

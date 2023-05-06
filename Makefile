@@ -6,12 +6,12 @@
 #    By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/28 16:38:05 by jlarrieu          #+#    #+#              #
-#    Updated: 2023/04/24 17:57:49 by pdubacqu         ###   ########.fr        #
+#    Updated: 2023/05/06 19:58:05 by ffeaugas         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC		=	c++
-CFLAGS	=	-g -Wall -Wextra -Werror -std=c++98
+CFLAGS	=	-g -Wall -Wextra -Werror -std=c++98 -O3
 
 SRCS	=	src/main.cpp					\
 			src/Client.cpp					\
@@ -40,7 +40,7 @@ sgr0	:= $(shell tput sgr0)
 
 all: $(NAME)
 
-.cpp.o: $(SRCS)
+.o: $(SRCS)
 	@$(CC) $(CFLAGS) -c -o $@ $<
 
 $(NAME): $(OBJ)

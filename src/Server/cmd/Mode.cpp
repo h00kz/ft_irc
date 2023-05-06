@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Mode.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:44 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/25 10:23:27 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/05/06 19:55:14 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,7 +58,7 @@ void Server::HandleOperatorMode(Client *client, Channel *channel, std::istringst
     Client  *target;
 
     iss >> targetName;
-    target = channel->findClient(targetName);
+    target = channel->FindClient(targetName);
     if (target == NULL)
     {
         client->SendData("MODE :Operator target is missing\n");
@@ -67,7 +67,7 @@ void Server::HandleOperatorMode(Client *client, Channel *channel, std::istringst
     else if (targetName.empty()) {
         client->SendData("MODE :Operator target is missing\n");
     }
-    else if (target->IsInChannel(channel->getName()) == false) {   
+    else if (target->IsInChannel(channel->GetName()) == false) {   
         client->SendData("MODE :Operator target " + target->GetNickname() + " is not in channel\n");
     }
     else if (operation == '+')
@@ -91,7 +91,7 @@ void Server::HandleLimitMode(Client *client, Channel *channel, std::istringstrea
             limitNb = std::atoi(limit.c_str());
             if (limitNb < 1 || limitNb > 1000)
                 client->SendData("MODE :Invalid limit [Allowed range : 1 - 1000]\n");
-            else if (limitNb < channel->getNbClients())
+            else if (limitNb < channel->GetNbClients())
                 client->SendData("MODE :Limit cannot be inferior than number of users in channel\n");
             else
             {
@@ -113,7 +113,7 @@ void    Server::HandleMode(Client *client, std::istringstream &iss)
     std::string channelName, modes, trash;
     iss >> channelName >> modes;
 
-    Channel *channel = findChannel(channelName);
+    Channel *channel = FindChannel(channelName);
     if (modes.empty()) {
         client->SendData("MODE :Need more params\n");
     }

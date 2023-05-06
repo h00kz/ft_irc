@@ -6,14 +6,13 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:42 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/21 15:21:45 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/06 19:33:00 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../Server.hpp"
-#include "../../utils.h"
 
-bool    Server::isAvailableNickname(std::string nickname)
+bool    Server::IsAvailableNickname(std::string nickname)
 {
     for (std::map<int, Client*>::iterator it = _clients.begin(); it != _clients.end(); ++it)
     {
@@ -46,7 +45,7 @@ void    Server::HandleNick(Client *client, std::istringstream &iss)
 	if (isValidNickname(nickname) == false) {
         client->SendData(nickname += " :Erroneus nickname\n");
 	}
-	else if (isAvailableNickname(nickname) == false) {
+	else if (IsAvailableNickname(nickname) == false) {
         client->SendData(nickname += ":Nickname is already owned by another client\n");
 	}
 	else {

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Part.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:40 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/04/25 10:12:27 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/05/06 18:57:10 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ void    Server::HandlePart(Client *client, std::istringstream &iss)
     }
     else {
         client->GetChannels().erase(name);
-        it->second->removeClient(client->GetSocketDescriptor());
+        it->second->RemoveClient(client->GetSocketDescriptor());
     	CloseEmptyChannels();
         std::cout << "Client left channel: " << name << std::endl;
     }
