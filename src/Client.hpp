@@ -29,6 +29,7 @@ class Client
 		std::string _username;
 		std::map<std::string, Channel*>	_channels;
 		time_t _lastActive;
+		std::string _cmd;
 	
 	public:
 		Client(int socketDescriptor, struct sockaddr_in address, Server* server);
@@ -69,6 +70,11 @@ class Client
 		bool							IsConnected() const;
 		bool							IsAuthenticated() const;
 		bool							IsInChannel(const std::string& channel) const;
+		bool							clientCmdIsEmpty();
+		void							AddCmd(std::string);
+		std::string	const				&getCmd();
+		void							clearCmd();
+
 };
 
 #endif //CLIENT_HPP

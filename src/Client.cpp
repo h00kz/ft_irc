@@ -21,6 +21,7 @@ Client::Client(int socketDescriptor, struct sockaddr_in address, Server* server)
 	_authenticated = false;
 	_username = "";
 	_nickname = "";
+	_cmd = "";
 }
 
 Client::~Client() {Close();}
@@ -140,12 +141,32 @@ std::string const &Client::GetServer() const { return _serverName; }
 
 std::string const &Client::GetUsername() const { return _username; }
 
+std::string	const &Client::getCmd() { return this->_cmd; }
+
 bool Client::IsAuthenticated() const { return (_authenticated); }
 
 bool Client::IsInChannel(const std::string &channel) const
 {
 		return (_channels.find(channel) != _channels.end());
 }
+
+void	Client::clearCmd()
+{
+	this->_cmd = "";	
+}
+
+bool	Client::clientCmdIsEmpty()
+{
+	if (this->_cmd == "")
+		return (true);
+	return (false);
+}
+
+void	Client::AddCmd(std::string entry)
+{
+	this->_cmd += entry;
+}
+
 
 bool Client::IsConnected() const
 {

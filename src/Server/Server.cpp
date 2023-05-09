@@ -166,10 +166,24 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 	}
 }
 
-bool Server::HandleAuthentification(Client* client, const std::string& command, std::istringstream& iss)
+bool Server::HandleAuthentification(Client* client, std::string command, std::istringstream& iss)
 {
+	std::string entry = iss.str();
+	if (entry.at(0) == 4)
+		return (true);
+	if (entry.at(entry.length() - 1) != '\n')
+	{
+		client->AddCmd(entry);
+		return (true);
+	}
+	if (client->clientCmdIsEmpty() == false)
+	{
+		iss.str(client->getCmd() + entry);
+		iss >> command;
+	}
 	if (command != "PASS" && client->IsAuthenticated() == false)
 	{
+
 		DisconnectClient(client, _clients);
 		return false;
 	}
@@ -178,16 +192,19 @@ bool Server::HandleAuthentification(Client* client, const std::string& command, 
 		case PASS:
 		{
 			HandlePass(client, iss);
+			client->clearCmd();
 			break;
 		}
 		case NICK:
 		{
 			HandleNick(client, iss);
+			client->clearCmd();
 			break;
 		}
 		case USER:
 		{
 			HandleUser(client, iss);
+			client->clearCmd();
 			break;
 		}
 		default :
@@ -382,6 +399,7 @@ void Server::Run()
 						}
 						else if (bytesRead > 0)
 						{
+							std::cout << "alo\n";
 							std::string receivedData = client->GetReceivedData();
 							std::istringstream iss(receivedData);
 							std::string command;

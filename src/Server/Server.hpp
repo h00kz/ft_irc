@@ -68,7 +68,7 @@ class Server
 		/*			Pv_FUNCTIONS		 */
 		bool		DisconnectClient(Client* client, std::map<int, Client*>& clients);
 		void 		HandleCommand(Client* client, const std::string& command, std::istringstream& iss);
-		bool		HandleAuthentification(Client* client, const std::string& command, std::istringstream& iss);		
+		bool		HandleAuthentification(Client* client, std::string command, std::istringstream& iss);		
 
 		/*   			CMD    		 */
 		//User
