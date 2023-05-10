@@ -6,7 +6,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/06 18:35:48 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/06 19:57:54 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/10 16:49:24 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ enum Command {
 	PART,
 	PASS,
 	PRIVMSG,
+	NOTICE,
 	UNKNOWN,
 	LIST,
 	MODE,
@@ -84,6 +85,8 @@ class Server
 		void    HandlePong(Client *client);
 		//PrivMsg
 		void    HandlePrivMsg(Client *client, std::istringstream &iss);
+		//Notice
+		void    HandleNotice(Client *client, std::istringstream &iss);
 		//Nick
 		void    HandleNick(Client *client, std::istringstream &iss);
 		bool    IsAvailableNickname(std::string nickname);
@@ -121,6 +124,7 @@ class Server
 		/*			Pb_FUNCTIONS		 */
 		void		Run();
 		void		BroadcastMessage(const std::string& channel, const std::string& message, Client* sender);
+		void		SendPrivateMessage(const std::string& target, const std::string& message, Client* sender, bool error_notifications);
 		void		SendPrivateMessage(const std::string& target, const std::string& message, Client* sender);
 		void 		RemoveChannel(const std::string &channel);
 		void 		Close();

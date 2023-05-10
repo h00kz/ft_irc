@@ -6,7 +6,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/06 18:40:51 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/06 18:40:53 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/10 13:40:37 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,7 +141,6 @@ int main(int argc, char *argv[])
 			pos = req.find_last_of(":");
 			message = req.substr(pos + 1, req.find_last_not_of("\r") + 1);
 			std::string formatMsg;
-			std::cout << "|" << message << "|" << std::endl;
 			if (!gameRunningPM && !gameRunningPFC)
 			{
 				formatMsg = "PRIVMSG "+ sender + " :Tapez !menu pour afficher le menu\r\n";

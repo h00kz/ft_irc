@@ -6,7 +6,7 @@
 #    By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/28 16:38:05 by jlarrieu          #+#    #+#              #
-#    Updated: 2023/05/06 19:58:05 by ffeaugas         ###   ########.fr        #
+#    Updated: 2023/05/10 15:36:31 by ffeaugas         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -26,6 +26,7 @@ SRCS	=	src/main.cpp					\
 			src/Server/cmd/Ping.cpp			\
 			src/Server/cmd/Pong.cpp			\
 			src/Server/cmd/PrivMsg.cpp		\
+			src/Server/cmd/Notice.cpp		\
 			src/Server/cmd/Topic.cpp		\
 			src/Server/cmd/Invite.cpp		\
 			src/Server/cmd/Kick.cpp			\

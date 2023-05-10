@@ -6,7 +6,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:42 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/06 19:33:00 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/10 15:21:37 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ static bool    isValidNickname(std::string nickname)
 {
 	if (nickname.size() > 9)
 		return (false);
-	if (nickname.find_first_of(" \t\r\n\f\v") != std::string::npos)
+	if (nickname.find_first_of(" \t\r\n\f\v#&") != std::string::npos)
 		return (false);
 	return (true);
 }
@@ -55,4 +55,4 @@ void    Server::HandleNick(Client *client, std::istringstream &iss)
 			std::cout << client->GetNickname() << " changed his nickname to " << nickname << std::endl;
 		client->SetNickname(nickname);
 	}
-}			
+}

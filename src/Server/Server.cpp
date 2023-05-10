@@ -6,7 +6,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/06 18:31:13 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/06 18:46:24 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/10 16:57:34 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,6 +87,8 @@ Command ParseCommand(const std::string& commandStr)
 		return PASS;
 	} else if (commandStr == "PRIVMSG") {
 		return PRIVMSG;
+	} else if (commandStr == "NOTICE") {
+		return NOTICE;
 	} else if (commandStr == "LIST") {
 		return LIST;
 	} else if (commandStr == "TOPIC") {
@@ -145,6 +147,10 @@ void Server::HandleCommand(Client* client, std::string command, std::istringstre
 		}
 		case PRIVMSG: {
 			HandlePrivMsg(client, iss);
+			break;
+		}
+		case NOTICE: {
+			HandleNotice(client, iss);
 			break;
 		}
 		case PART: {
@@ -301,7 +307,7 @@ void Server::BroadcastMessage(const std::string& channel, const std::string& mes
 	}
 }
 
-void Server::SendPrivateMessage(const std::string& target, const std::string& message, Client* sender)
+void Server::SendPrivateMessage(const std::string& target, const std::string& message, Client* sender, bool error_notifications)
 {
 	std::map<int, Client*>::iterator it;
 	for (it = _clients.begin(); it != _clients.end(); ++it)
@@ -313,7 +319,7 @@ void Server::SendPrivateMessage(const std::string& target, const std::string& me
 			break;
 		}
 	}
-	if (it == _clients.end())
+	if (it == _clients.end() && error_notifications == true)
 		sender->SendData("PRIVMSG :This user does not exist\n");
 }
 
@@ -412,7 +418,6 @@ void Server::Run()
 						}
 						else if (bytesRead > 0)
 						{
-							std::cout << "alo\n";
 							std::string receivedData = client->GetReceivedData();
 							std::istringstream iss(receivedData);
 							std::string command;
@@ -422,10 +427,7 @@ void Server::Run()
 								if (_clients.size() > 0)
 								{
 									if (client->IsAuthenticated() && !client->GetNickname().empty() && !client->GetUsername().empty())
-									{
 										HandleCommand(client, command, iss);
-										// ++it;
-									}
 									else
 									{
 										if (!HandleAuthentification(client, command, iss)) 

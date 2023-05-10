@@ -44,7 +44,7 @@ class Client
 		void	UpdateLastActive();
 		int		ReceiveData();
 		void	SendData(const std::string& data);
-		void	SendMessage(const std::string &target, const std::string &message);
+		void	SendMessage(const std::string& target, const std::string& message, bool error_notifications);
 		
 		//Setters
 

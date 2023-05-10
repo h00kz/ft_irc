@@ -6,7 +6,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/06 19:30:25 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/06 19:31:22 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/10 17:20:46 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,27 +77,26 @@ int Client::ReceiveData()
 		buffer[bytesRead] = '\0';
 		_receivedData = std::string(buffer);
 	}
-
 	return bytesRead;
 }
 
-void Client::SendMessage(const std::string& target, const std::string& message)
+void Client::SendMessage(const std::string& target, const std::string& message, bool error_notifications)
 {
 	if (_server)
 	{
 		std::string formattedMessage = ":" + _nickname + " PRIVMSG " + target + " :" + message + "\r\n";
-		if (target[0] == '#' && IsInChannel(target))
+		if ((target[0] == '#' || target[0] == '&') && IsInChannel(target))
 			_server->BroadcastMessage(target, formattedMessage, this);
-		else if (target[0] != '#')
-			_server->SendPrivateMessage(target, formattedMessage, this);
+		else if (target[0] != '#' && target[0] != '&')
+			_server->SendPrivateMessage(target, formattedMessage, this, error_notifications);
 		else
 		{
-			this->SendData("You are not a member of this channel\r\n");
+			if (error_notifications == true)
+				this->SendData("You are not a member of this channel\r\n");
 			std::cout << "Client not in channel " << target << "\n";
 		}
 	}
 }
-
 
 void Client::SendData(const std::string& data)
 {
