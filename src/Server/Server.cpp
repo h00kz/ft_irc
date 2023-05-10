@@ -102,8 +102,21 @@ Command ParseCommand(const std::string& commandStr)
 	}
 }
 
-void Server::HandleCommand(Client* client, const std::string& command, std::istringstream& iss)
+void Server::HandleCommand(Client* client, std::string command, std::istringstream& iss)
 {
+	std::string entry = iss.str();
+	if (entry.at(0) == 4)
+		return ;
+	if (entry.at(entry.length() - 1) != '\n')
+	{
+		client->AddCmd(entry);
+		return ;
+	}
+	if (client->clientCmdIsEmpty() == false)
+	{
+		iss.str(client->getCmd() + entry);
+		iss >> command;
+	}
 	switch (ParseCommand(command))
 	{
 		case PASS: {
