@@ -6,7 +6,7 @@
 #    By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2023/02/28 16:38:05 by jlarrieu          #+#    #+#              #
-#    Updated: 2023/05/10 17:37:10 by jlarrieu         ###   ########.fr        #
+#    Updated: 2023/05/10 17:54:05 by jlarrieu         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -28,6 +28,7 @@ SRCS	=	src/main.cpp					\
 			src/Server/cmd/Invite.cpp		\
 			src/Server/cmd/Kick.cpp			\
 			src/Server/cmd/User.cpp
+OBJ			=	$(SRCS:.cpp=.o)
 
 SRC_BONUS	=	bot_bonus.cpp
 OBJ_BONUS	=	$(SRC_BONUS:.cpp=.o)
@@ -54,7 +55,7 @@ $(NAME_BONUS): $(OBJ_BONUS)
 		$(CC) $(CFLAGS) ${OBJ_BONUS} -o $(NAME_BONUS) $(CFLAGS)
 		@printf "[$(green)✔$(sgr0)] $(bold)$(green)Compiling bot finished!$(sgr0)\n"
 
-bonus: $(NAME_BONUS)
+bonus: $(NAME) $(NAME_BONUS)
 	
 clean:
 		@echo "-----  Cleaning all objects...  -----"

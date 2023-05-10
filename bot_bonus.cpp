@@ -6,7 +6,7 @@
 /*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/06 18:40:51 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/10 17:02:00 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/05/10 18:01:54 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -173,10 +173,14 @@ int main(int argc, char *argv[])
 				targetNumber = randomNumber(0, 2);
 				aiChoice = choices[targetNumber];
 				try {
-					if (!message.compare(1, std::strlen("ciseaux"), "ciseaux") &&
-						!message.compare(1, std::strlen("feuille"), "feuille") &&
-						!message.compare(1, std::strlen("pierre"), "pierre"))
+					if (message.compare(0, std::strlen("ciseaux"), "ciseaux") &&
+						message.compare(0, std::strlen("feuille"), "feuille") &&
+						message.compare(0, std::strlen("pierre"), "pierre"))
+					{
+						formatMsg = "PRIVMSG "+ sender + " :Envoyez moi soit pierre soit feuille ou ciseaux\r\n";
+						send(clientSd, formatMsg.c_str(), formatMsg.length(), 0);
 						continue;
+					}
 					choice = message.substr(message.find_first_not_of(" "), message.find_last_not_of("\r\n") + 1);
 					std::cout << choice << std::endl;
 				}
