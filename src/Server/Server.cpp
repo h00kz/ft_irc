@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/06 18:31:13 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/11 15:57:32 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/05/11 16:59:48 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,14 +24,19 @@ void shandleSigint(int signal)
 
 std::string Server::ParsingCmd(const std::string& input)
 {
-	std::string tmp;
+	std::string tmp = "";
 	int i = 0;
 
-	while (input[i] != ' ')
+	if (input.empty() == true)
+		return "";
+	while (input[i] && input[i] != ' ')
+		i++;
+	while (input[i] && input[i] == ' ')
 		i++;
 	if (!input[i])
 	{
-		while (input[i] != '\n') 
+		i = 0;
+		while (input[i] != '\n' && input[i]) 
 		{
 			tmp += input[i];
 			i++;
@@ -39,8 +44,7 @@ std::string Server::ParsingCmd(const std::string& input)
 	}
 	else
 	{
-		i++;
-		while (input[i] != '\n')
+		while (input[i] != '\n' && input[i])
 		{
 			tmp += input[i];
 			i++;
@@ -236,6 +240,8 @@ bool Server::HandleAuthentification(Client* client, std::string &command, std::i
 			iss.str(entry.substr(entry.find_first_of(" "), entry.length()));
 			command = entry.substr(0, entry.find_first_of(" "));
 		}
+		else
+			command = entry.substr(0, entry.length() - 1);
 	}
 	if (command != "PASS" && client->IsAuthenticated() == false)
 	{
@@ -451,7 +457,7 @@ void Server::Run()
 							std::string receivedData = client->GetReceivedData();
 							std::istringstream iss(receivedData);
 							std::string command;
-							std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
+							// std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
 							if (iss >> command || (receivedData == "\n" && client->getCmd() != ""))
 							{
 								if (_clients.size() > 0)

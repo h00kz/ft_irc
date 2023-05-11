@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   PrivMsg.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:32 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/11 14:43:45 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/05/11 16:49:54 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,8 @@ void    Server::HandlePrivMsg(Client *client, std::istringstream &iss)
 	std::string target, message;
 	std::istringstream entry(ParsingCmd(iss.str()));
 	entry >> target;
-	message = entry.str().substr(entry.str().find_first_of(":"), entry.str().length());
+	if (entry.str().find_first_of(":") != std::string::npos)
+		message = entry.str().substr(entry.str().find_first_of(":"), entry.str().length());
 	if (target.empty()) {
 		client->SendData("PRIVMSG :No recipient given\n");
 	}

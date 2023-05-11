@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Mode.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:44 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/11 14:48:18 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/05/11 16:37:57 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,11 +39,13 @@ void Server::HandleTopicMode(Client *client, Channel *channel, char operation)
 void Server::HandleKeyMode(Client *client, Channel *channel, std::istringstream &iss, char operation)
 {
     std::string key;
+    std::string trash;
 	std::istringstream entry(ParsingCmd(iss.str()));
 
     if (operation == '+')
     {
-        entry >> key;
+        entry >> trash >> trash >> key;
+    	std::cout << "KEYfrommode : " << key << "\n";
         if (key.empty())
             client->SendData("MODE :Key is missing\n");
         else

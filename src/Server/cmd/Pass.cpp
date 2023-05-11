@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Pass.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:38 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/11 14:17:06 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/05/11 16:17:36 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,8 @@ void    Server::HandlePass(Client *client, std::istringstream &iss)
 {
     std::string password;
 
-    password = ParsingCmd(iss.str());
+    if (iss.str().empty() == false)
+        password = ParsingCmd(iss.str());
     // if (password.find(" ") != std::string::npos)
     //     password = password.substr(password.find(" "), password.length()); 
     // if (!password.empty() && password.find_first_not_of(" ") != std::string::npos && password.find_last_not_of("\r\n") != std::string::npos)

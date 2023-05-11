@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:29 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/11 14:32:18 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/05/11 17:13:47 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,13 @@ void    Server::HandleUser(Client *client, std::istringstream &iss)
 	std::istringstream entry(ParsingCmd(iss.str()));
 	
 	entry >> username >> host >> server;
-	realname = entry.str().substr(entry.str().find_last_of(":"), entry.str().length());
-	std::cout << "[" << realname << "]" << std::endl;
+    if (entry.str().find_first_of(":") == std::string::npos)
+        std::cout << "tamer le pelican\n";
+    if (entry.str().find_first_of(":") != std::string::npos)
+	    realname = entry.str().substr(entry.str().find_first_of(":"), entry.str().length());
     if (realname.empty() == true)
         client->SendData("USER :Not enough parameters\n");
-    else if (realname.at(0) != ':')
+    else if (realname.at(0) != ':' || realname.find_last_of(":") != 0)
     {
         std::cout << realname << std::endl;
         client->SendData("USER :realname must be prefixed with \":\"\n");

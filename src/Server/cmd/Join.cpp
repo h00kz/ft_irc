@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Join.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:47 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/11 14:52:19 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/05/11 16:40:40 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ void    Server::HandleJoin(Client *client, std::istringstream &iss)
 
 	entry >> name >> key;
 	std::cout << "JOIN called\n";
+	std::cout << "KEY : " << key << "\n";
 	std::map<std::string, Channel*>::iterator it = _channels.find(name);
 	if (name.empty()) {
         client->SendData("JOIN :Need more params\n");
@@ -68,7 +69,5 @@ void    Server::HandleJoin(Client *client, std::istringstream &iss)
 		if (it->second->IsInviteOnly())
 			it->second->DeleteInvitation(client->GetSocketDescriptor());
 	}
-	if (key.empty() == false)
-    	while(iss.get() != '\n');
 	client->UpdateLastActive();
 }

@@ -6,7 +6,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:40 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/06 18:57:10 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/11 16:52:46 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,10 @@
 void    Server::HandlePart(Client *client, std::istringstream &iss)
 {
     std::string name;
-    iss >> name;
 
-	std::map<std::string, Channel*>::iterator it = _channels.find(name);
+    if (iss.str().empty() == false)
+        name = ParsingCmd(iss.str());
+    std::map<std::string, Channel*>::iterator it = _channels.find(name);
     if (name.empty()) {
         client->SendData("PART :Not enough parameters\n");
     }
@@ -33,6 +34,4 @@ void    Server::HandlePart(Client *client, std::istringstream &iss)
     	CloseEmptyChannels();
         std::cout << "Client left channel: " << name << std::endl;
     }
-    if (name.empty() == false)
-        while(iss.get() != '\n');
 }
