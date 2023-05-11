@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server.hpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/06 18:35:48 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/10 16:49:24 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/11 14:12:44 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,6 +70,9 @@ class Server
 		bool		DisconnectClient(Client* client, std::map<int, Client*>& clients);
 		void 		HandleCommand(Client* client, std::string command, std::istringstream& iss);
 		bool		HandleAuthentification(Client* client, std::string &command, std::istringstream& iss);		
+
+		/*			PARSING				*/
+		std::string ParsingCmd(const std::string& input);
 
 		/*   			CMD    		 */
 		//User

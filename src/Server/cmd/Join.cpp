@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Join.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:47 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/06 18:47:21 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/11 14:52:19 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,9 @@ static bool    isValidChannelName(std::string channel)
 void    Server::HandleJoin(Client *client, std::istringstream &iss)
 {
 	std::string name, key;
-	iss >> name >> key;
+	std::istringstream entry(ParsingCmd(iss.str()));
 
+	entry >> name >> key;
 	std::cout << "JOIN called\n";
 	std::map<std::string, Channel*>::iterator it = _channels.find(name);
 	if (name.empty()) {

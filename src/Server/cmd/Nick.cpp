@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Nick.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:42 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/10 15:21:37 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/11 14:37:43 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,40 +31,11 @@ static bool    isValidNickname(std::string nickname)
 	return (true);
 }
 
-std::string parsing_no_fun(std::string nick)
-{
-	std::string tmp = "";
-	int i = 0;
-
-	while (nick[i] != ' ')
-		i++;
-	if (!nick[i])
-	{
-		while (nick[i] != '\n') 
-		{
-			tmp += nick[i];
-			i++;
-		}
-	}
-	else
-	{
-		i++;
-		while (nick[i] != '\n')
-		{
-			tmp += nick[i];
-			i++;
-		}
-	}
-	return (tmp);
-}
-
 void    Server::HandleNick(Client *client, std::istringstream &iss)
 {
     std::string nickname;
 
-	nickname = parsing_no_fun(iss.str());
-    std::cout << "NICK called\n";
-	std::cout << "Nickname : [" << nickname << "]\n";
+	nickname = ParsingCmd(iss.str());
 	if (nickname.empty()) {
         client->SendData("NICK :Not enough parameters\n");
 		return ;

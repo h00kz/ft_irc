@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Invite.cpp                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/06 18:32:04 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/06 18:39:34 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/11 14:51:28 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,11 @@
 void    Server::HandleInvite(Client *client, std::istringstream &iss)
 {
     std::string nickname, channelName;
+	std::istringstream entry(ParsingCmd(iss.str()));
     Client  *target;
     Channel *channel;
 
-    iss >> nickname >> channelName;
+    entry >> nickname >> channelName;
     target = FindClient(nickname);
     channel = FindChannel(channelName);
     if (channelName.empty()) {
@@ -43,6 +44,4 @@ void    Server::HandleInvite(Client *client, std::istringstream &iss)
         channel->SetInvitation(target->GetSocketDescriptor());
         std::cout << nickname << " successfully invited on " << channel << "\n";
     }
-    if (channelName.empty() == false)
-        while (iss.get() != '\n');
 }

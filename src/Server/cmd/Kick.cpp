@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Kick.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/06 18:32:14 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/06 19:39:39 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/11 14:49:50 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,9 +15,10 @@
 void	Server::HandleKick(Client *client, std::istringstream &iss)
 {
     std::string channel, target_name, comment;
-    
-    iss >> channel >> target_name;
-    getline(iss, comment);
+	std::istringstream entry(ParsingCmd(iss.str()));
+
+    entry >> channel >> target_name;
+    comment = entry.str().substr(entry.str().find_first_of(" "), entry.str().length());
     Channel* chan = FindChannel(channel);
     if (target_name.empty())
         client->SendData("KICK :Need more params\n");
