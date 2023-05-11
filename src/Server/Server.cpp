@@ -185,24 +185,26 @@ void Server::HandleCommand(Client* client, std::string command, std::istringstre
 	}
 }
 
-bool Server::HandleAuthentification(Client* client, std::string command, std::istringstream& iss)
+bool Server::HandleAuthentification(Client* client, std::string &command, std::istringstream& iss)
 {
 	std::string entry = iss.str();
 	if (entry.at(0) == 4)
 		return (true);
-	if (entry.at(entry.length() - 1) != '\n')
+	else if (entry.at(entry.length() - 1) != '\n')
 	{
 		client->AddCmd(entry);
 		return (true);
 	}
-	if (client->clientCmdIsEmpty() == false)
+	else if (client->clientCmdIsEmpty() == false)
 	{
-		iss.str(client->getCmd() + entry);
-		iss >> command;
+		entry = client->getCmd() + entry;
+		iss.str(entry.substr(entry.find_first_of(" ") + 1, entry.length() - 1));
+		command = entry.substr(0, entry.find_first_of(" "));
 	}
+	// std::cout << iss.str() << std::endl;
+	// std::cout << "|" << command << "|";
 	if (command != "PASS" && client->IsAuthenticated() == false)
 	{
-
 		DisconnectClient(client, _clients);
 		return false;
 	}
@@ -422,8 +424,10 @@ void Server::Run()
 							std::istringstream iss(receivedData);
 							std::string command;
 							std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
-							while (iss >> command)
+							while (iss >> command || receivedData == "\n")
 							{
+								if (receivedData == "\n")
+									iss.str("\n");
 								if (_clients.size() > 0)
 								{
 									if (client->IsAuthenticated() && !client->GetNickname().empty() && !client->GetUsername().empty())

@@ -17,9 +17,9 @@ void    Server::HandlePass(Client *client, std::istringstream &iss)
     std::string password;
 
     getline(iss, password);
+    std::cout << password;
     if (!password.empty() && password.find_first_not_of(" ") != std::string::npos && password.find_last_not_of("\r\n") != std::string::npos)
         password = password.substr(password.find_first_not_of(" "), password.find_last_not_of("\r\n"));
-    std::cout << "PASS called\n";
     if (password.empty()) {
         client->SendData("PASS :Not enough parameters\n");
     }
