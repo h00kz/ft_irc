@@ -16,7 +16,9 @@ void    Server::HandlePass(Client *client, std::istringstream &iss)
 {
     std::string password;
 
-    getline(iss, password);
+    password = iss.str();
+    if (password.find(" ") != std::string::npos)
+        password = password.substr(password.find(" "), password.length()); 
     std::cout << password;
     if (!password.empty() && password.find_first_not_of(" ") != std::string::npos && password.find_last_not_of("\r\n") != std::string::npos)
         password = password.substr(password.find_first_not_of(" "), password.find_last_not_of("\r\n"));

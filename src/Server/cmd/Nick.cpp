@@ -31,11 +31,38 @@ static bool    isValidNickname(std::string nickname)
 	return (true);
 }
 
+std::string parsing_no_fun(std::string nick)
+{
+	std::string tmp = "";
+	int i = 0;
+
+	while (nick[i] != ' ')
+		i++;
+	if (!nick[i])
+	{
+		while (nick[i] != '\n') 
+		{
+			tmp += nick[i];
+			i++;
+		}
+	}
+	else
+	{
+		i++;
+		while (nick[i] != '\n')
+		{
+			tmp += nick[i];
+			i++;
+		}
+	}
+	return (tmp);
+}
+
 void    Server::HandleNick(Client *client, std::istringstream &iss)
 {
     std::string nickname;
-    getline(iss, nickname);
-    nickname = nickname.substr(nickname.find_first_not_of(" "), nickname.find_last_not_of("\r\n"));
+
+	nickname = parsing_no_fun(iss.str());
     std::cout << "NICK called\n";
 	std::cout << "Nickname : [" << nickname << "]\n";
 	if (nickname.empty()) {

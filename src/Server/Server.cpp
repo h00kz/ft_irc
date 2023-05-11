@@ -197,8 +197,9 @@ bool Server::HandleAuthentification(Client* client, std::string &command, std::i
 	}
 	else if (client->clientCmdIsEmpty() == false)
 	{
+		std::cout << "je rentre ";
 		entry = client->getCmd() + entry;
-		iss.str(entry.substr(entry.find_first_of(" ") + 1, entry.length() - 1));
+		iss.str(entry.substr(entry.find_first_of(" "), entry.length()));
 		command = entry.substr(0, entry.find_first_of(" "));
 	}
 	// std::cout << iss.str() << std::endl;
@@ -229,14 +230,7 @@ bool Server::HandleAuthentification(Client* client, std::string &command, std::i
 			break;
 		}
 		default :
-		{
-			client->SendData("You're not fully authenticated :\n");
-			if (client->GetNickname() == "")
-				client->SendData("Nickname must be set\n");
-			if (client->GetUsername() == "")
-				client->SendData("Username must be set\n");
-			while(iss.get() != '\n');
-		}
+			break ;
 	}
 	return true;
 }
@@ -424,10 +418,8 @@ void Server::Run()
 							std::istringstream iss(receivedData);
 							std::string command;
 							std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
-							while (iss >> command || receivedData == "\n")
+							if (iss >> command || (receivedData == "\n" && client->getCmd() != ""))
 							{
-								if (receivedData == "\n")
-									iss.str("\n");
 								if (_clients.size() > 0)
 								{
 									if (client->IsAuthenticated() && !client->GetNickname().empty() && !client->GetUsername().empty())
