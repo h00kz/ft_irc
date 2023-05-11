@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Mode.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:44 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/11 16:37:57 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/11 17:40:12 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,7 @@ void Server::HandleKeyMode(Client *client, Channel *channel, std::istringstream 
 
     if (operation == '+')
     {
-        entry >> trash >> trash >> key;
-    	std::cout << "KEYfrommode : " << key << "\n";
+        while (entry >> key);
         if (key.empty())
             client->SendData("MODE :Key is missing\n");
         else
@@ -61,7 +60,7 @@ void Server::HandleOperatorMode(Client *client, Channel *channel, std::istringst
     Client  *target;
 	std::istringstream entry(ParsingCmd(iss.str()));
 
-    entry >> targetName;
+	while (entry >> targetName);
     target = channel->FindClient(targetName);
     if (target == NULL)
     {
@@ -88,7 +87,7 @@ void Server::HandleLimitMode(Client *client, Channel *channel, std::istringstrea
 
     if (operation == '+')
     {
-        entry >> limit;
+		while (entry >> limit);
         if (limit.empty())
             client->SendData("MODE :Limit number is missing\n");
         else
@@ -115,8 +114,9 @@ void Server::HandleLimitMode(Client *client, Channel *channel, std::istringstrea
 void    Server::HandleMode(Client *client, std::istringstream &iss)
 {
 
-    std::string channelName, modes, trash;
+    std::string channelName, modes;
 	std::istringstream entry(ParsingCmd(iss.str()));
+
     entry >> channelName >> modes;
     Channel *channel = FindChannel(channelName);
     if (modes.empty()) {

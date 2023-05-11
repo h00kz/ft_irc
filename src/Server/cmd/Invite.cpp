@@ -6,7 +6,7 @@
 /*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/06 18:32:04 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/11 14:51:28 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/05/11 17:49:29 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,6 @@ void    Server::HandleInvite(Client *client, std::istringstream &iss)
     }
     else {
         channel->SetInvitation(target->GetSocketDescriptor());
-        std::cout << nickname << " successfully invited on " << channel << "\n";
+        std::cout << nickname << " successfully invited on " << channel->GetName() << "\n";
     }
 }

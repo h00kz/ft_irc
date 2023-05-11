@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Pass.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:38 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/11 16:17:36 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/11 17:28:50 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,7 @@ void    Server::HandlePass(Client *client, std::istringstream &iss)
     std::string password;
 
     if (iss.str().empty() == false)
-        password = ParsingCmd(iss.str());
-    // if (password.find(" ") != std::string::npos)
-    //     password = password.substr(password.find(" "), password.length()); 
-    // if (!password.empty() && password.find_first_not_of(" ") != std::string::npos && password.find_last_not_of("\r\n") != std::string::npos)
-    //     password = password.substr(password.find_first_not_of(" "), password.find_last_not_of("\r\n"));
+		password = ParsingCmd(iss.str());
     if (password.empty()) {
         client->SendData("PASS :Not enough parameters\n");
     }
