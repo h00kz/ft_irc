@@ -414,7 +414,7 @@ void Server::Run()
 	}
 }
 
-void	Server::HandleData(Client	*client, std::map<int, Client*>::iterator it)
+void	Server::HandleData(Client	*client, std::map<int, Client*>::iterator& it)
 {
 	std::string receivedData = client->GetReceivedData();
 	std::istringstream iss(receivedData);
