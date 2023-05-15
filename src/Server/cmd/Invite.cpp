@@ -6,7 +6,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/06 18:32:04 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/15 15:43:09 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/15 16:08:44 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ void    Server::HandleInvite(Client *client, std::istringstream &iss)
     }
     else {
         channel->SetInvitation(target->GetSocketDescriptor());
-        std::cout << nickname << " successfully invited on " << channel << "\n";
+        std::cout << nickname << " successfully invited on " << channel->GetName() << "\n";
     }
     if (channelName.empty() == false)
         while (iss.get() != '\n');

@@ -316,7 +316,7 @@ void	Server::CloseEmptyChannels(void)
 	std::map<std::string, Channel*>::iterator it;
 	for (it = _channels.begin(); it != _channels.end(); ++it)
 	{
-		std::cout << it->second->GetNbClients() << " clients left in the channel\n";
+		std::cout << it->second->GetNbClients() << " clients left in the channel " << it->second->GetName() << std::endl;
 
 		if (it->second->GetNbClients() == 0) {
 			emptyChannels.push_back(it->first);
@@ -431,7 +431,6 @@ void	Server::HandleData(Client	*client, std::map<int, Client*>::iterator it)
 		receivedData.clear();
 		if (check == 1 && count == 0 && client->getCmd().empty() == false)
 		{
-			std::cout << client->getCmd();
 			std::string entry = iss.str();
 			iss.clear();
 			iss.str(client->getCmd() + entry);
