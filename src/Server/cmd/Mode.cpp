@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Mode.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:44 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/11 17:40:12 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/05/06 19:55:14 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,12 +39,10 @@ void Server::HandleTopicMode(Client *client, Channel *channel, char operation)
 void Server::HandleKeyMode(Client *client, Channel *channel, std::istringstream &iss, char operation)
 {
     std::string key;
-    std::string trash;
-	std::istringstream entry(ParsingCmd(iss.str()));
-
+    
     if (operation == '+')
     {
-        while (entry >> key);
+        iss >> key;
         if (key.empty())
             client->SendData("MODE :Key is missing\n");
         else
@@ -58,9 +56,8 @@ void Server::HandleOperatorMode(Client *client, Channel *channel, std::istringst
 {
     std::string targetName;
     Client  *target;
-	std::istringstream entry(ParsingCmd(iss.str()));
 
-	while (entry >> targetName);
+    iss >> targetName;
     target = channel->FindClient(targetName);
     if (target == NULL)
     {
@@ -82,12 +79,11 @@ void Server::HandleOperatorMode(Client *client, Channel *channel, std::istringst
 void Server::HandleLimitMode(Client *client, Channel *channel, std::istringstream &iss, char operation)
 {
     std::string limit;
-	std::istringstream entry(ParsingCmd(iss.str()));
     int limitNb;
 
     if (operation == '+')
     {
-		while (entry >> limit);
+        iss >> limit;
         if (limit.empty())
             client->SendData("MODE :Limit number is missing\n");
         else
@@ -114,10 +110,9 @@ void Server::HandleLimitMode(Client *client, Channel *channel, std::istringstrea
 void    Server::HandleMode(Client *client, std::istringstream &iss)
 {
 
-    std::string channelName, modes;
-	std::istringstream entry(ParsingCmd(iss.str()));
+    std::string channelName, modes, trash;
+    iss >> channelName >> modes;
 
-    entry >> channelName >> modes;
     Channel *channel = FindChannel(channelName);
     if (modes.empty()) {
         client->SendData("MODE :Need more params\n");
@@ -152,4 +147,7 @@ void    Server::HandleMode(Client *client, std::istringstream &iss)
                 client->SendData("MODE :Invalid mode : " + modes[i] + '\n');
         }
     }
+    iss >> trash;
+    if (trash.empty() == false)
+    	while(iss.get() != '\n');
 }

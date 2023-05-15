@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Join.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:47 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/11 17:48:33 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/05/06 18:47:21 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,9 +26,8 @@ static bool    isValidChannelName(std::string channel)
 void    Server::HandleJoin(Client *client, std::istringstream &iss)
 {
 	std::string name, key;
-	std::istringstream entry(ParsingCmd(iss.str()));
+	iss >> name >> key;
 
-	entry >> name >> key;
 	std::cout << "JOIN called\n";
 	std::map<std::string, Channel*>::iterator it = _channels.find(name);
 	if (name.empty()) {
@@ -68,5 +67,7 @@ void    Server::HandleJoin(Client *client, std::istringstream &iss)
 		if (it->second->IsInviteOnly())
 			it->second->DeleteInvitation(client->GetSocketDescriptor());
 	}
+	if (key.empty() == false)
+    	while(iss.get() != '\n');
 	client->UpdateLastActive();
 }

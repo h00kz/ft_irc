@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   User.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
+/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:29 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/11 17:13:47 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/04/25 10:15:26 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,14 @@
 void    Server::HandleUser(Client *client, std::istringstream &iss)
 {
     std::string username, host, server, realname;
-	std::istringstream entry(ParsingCmd(iss.str()));
-	
-	entry >> username >> host >> server;
-    if (entry.str().find_first_of(":") == std::string::npos)
-        std::cout << "tamer le pelican\n";
-    if (entry.str().find_first_of(":") != std::string::npos)
-	    realname = entry.str().substr(entry.str().find_first_of(":"), entry.str().length());
+
+    std::cout << "USER called\n";
+    iss >> username >> host >> server;
+    getline(iss, realname);
+    realname = realname.substr(0, realname.find_last_not_of("\r\n") + 1);
     if (realname.empty() == true)
         client->SendData("USER :Not enough parameters\n");
-    else if (realname.at(0) != ':' || realname.find_last_of(":") != 0)
+    else if (realname[1] != ':')
     {
         std::cout << realname << std::endl;
         client->SendData("USER :realname must be prefixed with \":\"\n");
@@ -33,7 +31,7 @@ void    Server::HandleUser(Client *client, std::istringstream &iss)
         client->SendData("USER :You may not reregister\n");
     else
     {
-        realname.erase(0, 1);
+        realname.erase(0, 2);
         client->SetUsername(username);
         client->SetHost(host);
         client->SetServer(server);

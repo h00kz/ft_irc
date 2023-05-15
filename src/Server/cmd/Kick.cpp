@@ -6,7 +6,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/06 18:32:14 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/11 16:46:59 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/06 19:39:39 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,9 @@
 void	Server::HandleKick(Client *client, std::istringstream &iss)
 {
     std::string channel, target_name, comment;
-	std::istringstream entry(ParsingCmd(iss.str()));
-
-    entry >> channel >> target_name;
-    if (entry.str().find_first_of(" ") != std::string::npos)
-    comment = entry.str().substr(entry.str().find_first_of(" "), entry.str().length());
+    
+    iss >> channel >> target_name;
+    getline(iss, comment);
     Channel* chan = FindChannel(channel);
     if (target_name.empty())
         client->SendData("KICK :Need more params\n");

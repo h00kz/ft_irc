@@ -6,7 +6,7 @@
 /*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/06 18:35:48 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/11 14:12:44 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/05/15 12:16:25 by jlarrieu         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ class Server
 
 		/*			Pv_FUNCTIONS		 */
 		bool		DisconnectClient(Client* client, std::map<int, Client*>& clients);
-		void 		HandleCommand(Client* client, std::string command, std::istringstream& iss);
+		void 		HandleCommand(Client* client, std::string &command, std::istringstream& iss);
 		bool		HandleAuthentification(Client* client, std::string &command, std::istringstream& iss);		
 
 		/*			PARSING				*/

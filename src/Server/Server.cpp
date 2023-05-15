@@ -97,13 +97,15 @@ Command ParseCommand(const std::string& commandStr)
 	} else if (commandStr == "KICK") {
 		return KICK;
 	} else if (commandStr == "MODE") {
-	return MODE;
+		return MODE;
+	} else if (commandStr == "NOTICE") {
+		return NOTICE;
 	} else {
 		return UNKNOWN;
 	}
 }
 
-void Server::HandleCommand(Client* client, const std::string& command, std::istringstream& iss)
+void Server::HandleCommand(Client* client, std::string& command, std::istringstream& iss)
 {
 	switch (ParseCommand(command))
 	{
@@ -158,7 +160,11 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 		case MODE: {
 			HandleMode(client, iss);
 			break;
-		}		
+		}
+		case NOTICE: {
+			HandleNotice(client, iss);
+			break;
+		}	
 		case UNKNOWN: {
 			std::cout << "Unknown command: " << command << std::endl;
 			while(iss.get() != '\n');
@@ -168,7 +174,7 @@ void Server::HandleCommand(Client* client, const std::string& command, std::istr
 	client->clearCmd();
 }
 
-bool Server::HandleAuthentification(Client* client, std::string command, std::istringstream& iss)
+bool Server::HandleAuthentification(Client* client, std::string& command, std::istringstream& iss)
 {
 	if (command != "PASS" && client->IsAuthenticated() == false)
 	{
@@ -244,7 +250,6 @@ Client	*Server::FindClient(const std::string &name)
 
 Channel	*Server::FindChannel(const std::string &name)
 {
-    
     std::map<std::string, Channel *>::iterator it = _channels.find(name);
     if (it != _channels.end())
         return (it->second);
@@ -274,7 +279,7 @@ void Server::BroadcastMessage(const std::string& channel, const std::string& mes
 	}
 }
 
-void Server::SendPrivateMessage(const std::string& target, const std::string& message, Client* sender)
+void Server::SendPrivateMessage(const std::string& target, const std::string& message, Client* sender, bool error_notifications)
 {
 	std::map<int, Client*>::iterator it;
 	for (it = _clients.begin(); it != _clients.end(); ++it)
@@ -286,15 +291,14 @@ void Server::SendPrivateMessage(const std::string& target, const std::string& me
 			break;
 		}
 	}
-	if (it == _clients.end())
+	if (it == _clients.end() && error_notifications == true)
 		sender->SendData("PRIVMSG :This user does not exist\n");
 }
 
 bool Server::DisconnectClient(Client* client, std::map<int, Client*>& clients)
 {
-	//Remove client from server client map and close its socket
 	if (epoll_ctl(_epollFd, EPOLL_CTL_DEL, client->GetSocketDescriptor(), NULL) == -1)
-	std::cerr << "Epoll_ctl DISCO: " << strerror(errno) << std::endl;
+		std::cerr << "Epoll_ctl DISCO: " << strerror(errno) << std::endl;
 	std::cout << "Client disconnected: " << inet_ntoa(client->GetAddress().sin_addr) << ":" << ntohs(client->GetAddress().sin_port) << std::endl;
 	client->Close();
 	clients.erase(client->GetSocketDescriptor());
@@ -388,7 +392,7 @@ void Server::Run()
 							std::string receivedData = client->GetReceivedData();
 							std::istringstream iss(receivedData);
 							std::string command;
-							std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
+							// std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
 							int check = 0;
 							int count = 0;
 							while (iss >> command || (receivedData.empty() == false && receivedData == "\n"))

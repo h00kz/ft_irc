@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Nick.cpp                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:42 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/11 14:37:43 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/05/10 15:21:37 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,10 @@ static bool    isValidNickname(std::string nickname)
 void    Server::HandleNick(Client *client, std::istringstream &iss)
 {
     std::string nickname;
-
-	nickname = ParsingCmd(iss.str());
+    getline(iss, nickname);
+    nickname = nickname.substr(nickname.find_first_not_of(" "), nickname.find_last_not_of("\r\n"));
+    std::cout << "NICK called\n";
+	std::cout << "Nickname : [" << nickname << "]\n";
 	if (nickname.empty()) {
         client->SendData("NICK :Not enough parameters\n");
 		return ;

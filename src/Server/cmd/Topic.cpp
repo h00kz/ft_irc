@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Topic.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jlarrieu <jlarrieu@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/06 18:35:57 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/11 15:00:16 by jlarrieu         ###   ########.fr       */
+/*   Updated: 2023/05/06 19:47:55 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,16 +15,15 @@
 void    Server::HandleTopic(Client *client, std::istringstream &iss)
 {
     std::string channelName, topicName;
-	std::istringstream entry(ParsingCmd(iss.str()));
+    iss >> channelName;
 
-	entry >> channelName;
 	std::cout << "TOPIC called\n";
 	std::map<std::string, Channel*>::iterator it = _channels.find(channelName);
     if (channelName.empty()) {
         client->SendData("TOPIC :Need more params\n");
         return ;
     }
-    entry >> topicName;
+    iss >> topicName;
     if (it == _channels.end() || (channelName[0] != '#' && channelName[0] != '&')) {
         client->SendData("Invalid channel\n");
     }
@@ -46,7 +45,7 @@ void    Server::HandleTopic(Client *client, std::istringstream &iss)
     else {
         topicName.erase(0, 1);
         it->second->setTopic(topicName);
-        while (entry >> topicName)
+        while (iss >> topicName)
         {
             it->second->setTopic(it->second->GetTopic().append(" "));
             it->second->setTopic(it->second->GetTopic().append(topicName));    
@@ -54,4 +53,6 @@ void    Server::HandleTopic(Client *client, std::istringstream &iss)
         std::cout << channelName << " topic set\n";
         return ;
     }
+    if (topicName.empty() == false)
+        while(iss.get() != '\n');
 }
