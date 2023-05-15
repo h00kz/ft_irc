@@ -151,7 +151,7 @@ bool Client::IsInChannel(const std::string &channel) const
 
 void	Client::clearCmd()
 {
-	this->_cmd = "";	
+	this->_cmd.clear();	
 }
 
 bool	Client::clientCmdIsEmpty()

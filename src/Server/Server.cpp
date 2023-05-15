@@ -1,3 +1,4 @@
+
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
@@ -6,7 +7,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/06 18:31:13 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/11 16:59:48 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/06 18:46:24 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,37 +21,6 @@ void shandleSigint(int signal)
 	quitStatus = true;
 	g_server->Close();
 	exit(signal);
-}
-
-std::string Server::ParsingCmd(const std::string& input)
-{
-	std::string tmp = "";
-	int i = 0;
-
-	if (input.empty() == true)
-		return "";
-	while (input[i] && input[i] != ' ')
-		i++;
-	while (input[i] && input[i] == ' ')
-		i++;
-	if (!input[i])
-	{
-		i = 0;
-		while (input[i] != '\n' && input[i]) 
-		{
-			tmp += input[i];
-			i++;
-		}
-	}
-	else
-	{
-		while (input[i] != '\n' && input[i])
-		{
-			tmp += input[i];
-			i++;
-		}
-	}
-	return (tmp);
 }
 
 Server::Server(int port, std::string const &passwd)
@@ -118,8 +88,6 @@ Command ParseCommand(const std::string& commandStr)
 		return PASS;
 	} else if (commandStr == "PRIVMSG") {
 		return PRIVMSG;
-	} else if (commandStr == "NOTICE") {
-		return NOTICE;
 	} else if (commandStr == "LIST") {
 		return LIST;
 	} else if (commandStr == "TOPIC") {
@@ -135,26 +103,8 @@ Command ParseCommand(const std::string& commandStr)
 	}
 }
 
-void Server::HandleCommand(Client* client, std::string command, std::istringstream& iss)
+void Server::HandleCommand(Client* client, const std::string& command, std::istringstream& iss)
 {
-	std::string entry = iss.str();
-	if (entry.at(0) == 4)
-		return ;
-	else if (entry.at(entry.length() - 1) != '\n')
-	{
-		client->AddCmd(entry);
-		return ;
-	}
-	else if (client->clientCmdIsEmpty() == false)
-	{
-		entry = client->getCmd() + entry;
-		if (entry.find(" ") != std::string::npos) {
-			iss.str(entry.substr(entry.find_first_of(" "), entry.length()));
-			command = entry.substr(0, entry.find_first_of(" "));
-		}
-		else
-			command = entry.substr(0, entry.length() - 1);
-	}
 	switch (ParseCommand(command))
 	{
 		case PASS: {
@@ -185,10 +135,6 @@ void Server::HandleCommand(Client* client, std::string command, std::istringstre
 			HandlePrivMsg(client, iss);
 			break;
 		}
-		case NOTICE: {
-			HandleNotice(client, iss);
-			break;
-		}
 		case PART: {
 			HandlePart(client, iss);
 			break;
@@ -215,34 +161,15 @@ void Server::HandleCommand(Client* client, std::string command, std::istringstre
 		}		
 		case UNKNOWN: {
 			std::cout << "Unknown command: " << command << std::endl;
+			while(iss.get() != '\n');
 			break;
 		}
 	}
 	client->clearCmd();
 }
 
-bool Server::HandleAuthentification(Client* client, std::string &command, std::istringstream& iss)
+bool Server::HandleAuthentification(Client* client, std::string command, std::istringstream& iss)
 {
-	std::string entry = iss.str();
-	if (entry.at(0) == 4)
-	{
-		return (true);
-	}
-	else if (entry.at(entry.length() - 1) != '\n')
-	{
-		client->AddCmd(entry);
-		return (true);
-	}
-	else if (client->clientCmdIsEmpty() == false)
-	{
-		entry = client->getCmd() + entry;
-		if (entry.find(" ") != std::string::npos) {
-			iss.str(entry.substr(entry.find_first_of(" "), entry.length()));
-			command = entry.substr(0, entry.find_first_of(" "));
-		}
-		else
-			command = entry.substr(0, entry.length() - 1);
-	}
 	if (command != "PASS" && client->IsAuthenticated() == false)
 	{
 		DisconnectClient(client, _clients);
@@ -252,24 +179,28 @@ bool Server::HandleAuthentification(Client* client, std::string &command, std::i
 	{
 		case PASS:
 		{
-			std::cout << "PASS called\n";
 			HandlePass(client, iss);
 			break;
 		}
 		case NICK:
 		{
-			std::cout << "NICK called\n";
 			HandleNick(client, iss);
 			break;
 		}
 		case USER:
 		{
-			std::cout << "USER called\n";
 			HandleUser(client, iss);
 			break;
 		}
 		default :
-			break ;
+		{
+			client->SendData("You're not fully authenticated :\n");
+			if (client->GetNickname() == "")
+				client->SendData("Nickname must be set\n");
+			if (client->GetUsername() == "")
+				client->SendData("Username must be set\n");
+			while(iss.get() != '\n');
+		}
 	}
 	client->clearCmd();
 	return true;
@@ -343,7 +274,7 @@ void Server::BroadcastMessage(const std::string& channel, const std::string& mes
 	}
 }
 
-void Server::SendPrivateMessage(const std::string& target, const std::string& message, Client* sender, bool error_notifications)
+void Server::SendPrivateMessage(const std::string& target, const std::string& message, Client* sender)
 {
 	std::map<int, Client*>::iterator it;
 	for (it = _clients.begin(); it != _clients.end(); ++it)
@@ -355,7 +286,7 @@ void Server::SendPrivateMessage(const std::string& target, const std::string& me
 			break;
 		}
 	}
-	if (it == _clients.end() && error_notifications == true)
+	if (it == _clients.end())
 		sender->SendData("PRIVMSG :This user does not exist\n");
 }
 
@@ -457,22 +388,38 @@ void Server::Run()
 							std::string receivedData = client->GetReceivedData();
 							std::istringstream iss(receivedData);
 							std::string command;
-							// std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
-							if (iss >> command || (receivedData == "\n" && client->getCmd() != ""))
+							std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
+							int check = 0;
+							int count = 0;
+							while (iss >> command || (receivedData.empty() == false && receivedData == "\n"))
 							{
+								if (receivedData.empty() == false && receivedData.at(receivedData.length() - 1) == '\n')
+									check = 1;
+								if (count == 0 && check == 0)
+									client->AddCmd(iss.str());
+								receivedData.clear();
+								if (check == 1 && count == 0 && client->getCmd().empty() == false)
+								{
+									std::cout << client->getCmd();
+									std::string entry = iss.str();
+									iss.clear();
+									iss.str(client->getCmd() + entry);
+									iss >> command;
+								}
 								if (_clients.size() > 0)
 								{
-									if (client->IsAuthenticated() && !client->GetNickname().empty() && !client->GetUsername().empty())
+									if (client->IsAuthenticated() && !client->GetNickname().empty() && !client->GetUsername().empty() && check == 1)
 										HandleCommand(client, command, iss);
 									else
 									{
-										if (!HandleAuthentification(client, command, iss)) 
+										if (check == 1 && !HandleAuthentification(client, command, iss)) 
 										{
 											it = _clients.begin();
 											break ;
 										}
 									}
 								}
+								count++;
 							}
 						}
 						else
