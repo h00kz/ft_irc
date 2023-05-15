@@ -369,6 +369,7 @@ void Server::Run()
 					if (epoll_ctl(_epollFd, EPOLL_CTL_ADD, clientSd, &ev) == -1)
 					{
 						std::cerr << "Epoll_ctl: " << strerror(errno) << std::endl;
+						Close();
 						exit(EXIT_FAILURE);
 					}
 				}
@@ -388,44 +389,7 @@ void Server::Run()
 								it = _clients.begin();
 						}
 						else if (bytesRead > 0)
-						{
-							std::string receivedData = client->GetReceivedData();
-							std::istringstream iss(receivedData);
-							std::string command;
-							// std::cout << receivedData << std::endl; // PRINT DATA REQUEST CLIENT
-							int check = 0;
-							int count = 0;
-							while (iss >> command || (receivedData.empty() == false && receivedData == "\n"))
-							{
-								if (receivedData.empty() == false && receivedData.at(receivedData.length() - 1) == '\n')
-									check = 1;
-								if (count == 0 && check == 0)
-									client->AddCmd(iss.str());
-								receivedData.clear();
-								if (check == 1 && count == 0 && client->getCmd().empty() == false)
-								{
-									std::cout << client->getCmd();
-									std::string entry = iss.str();
-									iss.clear();
-									iss.str(client->getCmd() + entry);
-									iss >> command;
-								}
-								if (_clients.size() > 0)
-								{
-									if (client->IsAuthenticated() && !client->GetNickname().empty() && !client->GetUsername().empty() && check == 1)
-										HandleCommand(client, command, iss);
-									else
-									{
-										if (check == 1 && !HandleAuthentification(client, command, iss)) 
-										{
-											it = _clients.begin();
-											break ;
-										}
-									}
-								}
-								count++;
-							}
-						}
+							HandleData(client, it);
 						else
 							++it;
 					}
@@ -447,6 +411,46 @@ void Server::Run()
 				}
 			}
 		}
+	}
+}
+
+void	Server::HandleData(Client	*client, std::map<int, Client*>::iterator it)
+{
+	std::string receivedData = client->GetReceivedData();
+	std::istringstream iss(receivedData);
+	std::string command;
+	int check = 0;
+	int count = 0;
+
+	while (iss >> command || (receivedData.empty() == false && receivedData == "\n"))
+	{
+		if (receivedData.empty() == false && receivedData.at(receivedData.length() - 1) == '\n')
+			check = 1;
+		if (count == 0 && check == 0)
+			client->AddCmd(iss.str());
+		receivedData.clear();
+		if (check == 1 && count == 0 && client->getCmd().empty() == false)
+		{
+			std::cout << client->getCmd();
+			std::string entry = iss.str();
+			iss.clear();
+			iss.str(client->getCmd() + entry);
+			iss >> command;
+		}
+		if (_clients.size() > 0)
+		{
+			if (client->IsAuthenticated() && !client->GetNickname().empty() && !client->GetUsername().empty() && check == 1)
+				HandleCommand(client, command, iss);
+			else
+			{
+				if (check == 1 && !HandleAuthentification(client, command, iss)) 
+				{
+					it = _clients.begin();
+					break ;
+				}
+			}
+		}
+		count++;
 	}
 }
 

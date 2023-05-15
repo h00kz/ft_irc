@@ -6,7 +6,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/06 18:31:29 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/06 18:57:50 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/15 15:43:51 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,6 @@ void    Channel::setTopic(std::string topic) { this->_topic = topic; }
 void    Channel::SetOperator(int targetDescriptor, bool mode)
 {
     this->_clients.find(targetDescriptor)->second->op = mode;
-    std::cout << "C: " << _clients.find(targetDescriptor)->second->client->GetNickname() << " op: " << _clients.find(targetDescriptor)->second->op << std::endl;
 }
 
 void    Channel::SetLimit(int limit) { this->_limit = limit; }

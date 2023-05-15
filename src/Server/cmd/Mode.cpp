@@ -6,7 +6,7 @@
 /*   By: ffeaugas <ffeaugas@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/18 13:31:44 by ffeaugas          #+#    #+#             */
-/*   Updated: 2023/05/06 19:55:14 by ffeaugas         ###   ########.fr       */
+/*   Updated: 2023/05/15 15:52:07 by ffeaugas         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,10 +70,14 @@ void Server::HandleOperatorMode(Client *client, Channel *channel, std::istringst
     else if (target->IsInChannel(channel->GetName()) == false) {   
         client->SendData("MODE :Operator target " + target->GetNickname() + " is not in channel\n");
     }
-    else if (operation == '+')
+    else if (operation == '+') {
         channel->SetOperator(target->GetSocketDescriptor(), true);
-    else
+        client->SendData("MODE :New operator set\n");
+    }
+    else {
         channel->SetOperator(target->GetSocketDescriptor(), false);
+        client->SendData("MODE :Operator removed\n");
+    }
 }
 
 void Server::HandleLimitMode(Client *client, Channel *channel, std::istringstream &iss, char operation)
